@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -17,22 +18,86 @@ import 'package:simple_live_app/widgets/desktop_refresh_button.dart';
 import 'package:simple_live_app/widgets/follow_user_item.dart';
 import 'package:window_manager/window_manager.dart';
 
+class _CursorAutoHide extends StatefulWidget {
+  final Widget child;
+  final bool enable;
+  const _CursorAutoHide({required this.child, required this.enable});
+  @override
+  State<_CursorAutoHide> createState() => _CursorAutoHideState();
+}
+
+class _CursorAutoHideState extends State<_CursorAutoHide> {
+  Timer? _timer;
+  bool _hide = false;
+
+  void _startTimer() {
+    _timer?.cancel();
+    if (!widget.enable) return;
+    _timer = Timer(const Duration(seconds: 3), () {
+      if (mounted) setState(() => _hide = true);
+    });
+  }
+
+  void _onPointerEvent(PointerEvent e) {
+    if (_hide) setState(() => _hide = false);
+    _startTimer();
+  }
+
+  @override
+  void didUpdateWidget(covariant _CursorAutoHide oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.enable != oldWidget.enable && !widget.enable) {
+      _timer?.cancel();
+      if (_hide) setState(() => _hide = false);
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: _hide ? SystemMouseCursors.none : SystemMouseCursors.basic,
+      onHover: _onPointerEvent,
+      onEnter: _onPointerEvent,
+      child: Listener(
+        onPointerDown: _onPointerEvent,
+        onPointerMove: _onPointerEvent,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
 Widget playerControls(
   VideoState videoState,
   LiveRoomController controller,
 ) {
   return Obx(() {
-    if (controller.fullScreenState.value) {
-      return buildFullControls(
+    final isDesktop = Platform.isWindows || Platform.isLinux || Platform.isMacOS;
+    final isFull = controller.fullScreenState.value;
+    Widget content;
+    if (isFull) {
+      content = buildFullControls(
+        videoState,
+        controller,
+      );
+    } else {
+      content = buildControls(
+        videoState.context.orientation == Orientation.portrait,
         videoState,
         controller,
       );
     }
-    return buildControls(
-      videoState.context.orientation == Orientation.portrait,
-      videoState,
-      controller,
-    );
+    if (isDesktop && isFull) {
+      return _CursorAutoHide(child: content, enable: true);
+    } else {
+      return content;
+    }
   });
 }
 
