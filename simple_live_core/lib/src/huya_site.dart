@@ -308,6 +308,7 @@ class HuyaSite implements LiveSite {
       online: tLiveInfo["lTotalCount"],
       roomId: tLiveInfo["lProfileRoom"].toString(),
       title: title,
+      areaName: tLiveInfo["sGameFullName"].toString(),
       userName: tProfileInfo["sNick"].toString(),
       userAvatar: tProfileInfo["sAvatar180"].toString(),
       introduction: tLiveInfo["sIntroduction"].toString(),

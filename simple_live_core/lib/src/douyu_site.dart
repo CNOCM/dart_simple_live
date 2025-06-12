@@ -199,6 +199,7 @@ class DouyuSite implements LiveSite {
       online: int.tryParse(roomInfo["room_biz_all"]["hot"].toString()) ?? 0,
       roomId: roomInfo["room_id"].toString(),
       title: roomInfo["room_name"].toString(),
+      areaName: roomInfo["second_lvl_name"].toString(),
       userName: roomInfo["owner_name"].toString(),
       userAvatar: roomInfo["owner_avatar"].toString(),
       introduction: roomInfo["show_details"].toString(),

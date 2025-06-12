@@ -223,6 +223,9 @@ class DouyinSite implements LiveSite {
       roomId: webRid,
       title: room["title"].toString(),
       cover: roomStatus ? room["cover"]["url_list"][0].toString() : "",
+      areaName: roomStatus
+          ? roomData["partition_road_map"]["partition"]["title"].toString()
+          : "",
       userName: owner["nickname"].toString(),
       userAvatar: owner["avatar_thumb"]["url_list"][0].toString(),
       online: roomStatus
@@ -280,6 +283,9 @@ class DouyinSite implements LiveSite {
       roomId: webRid,
       title: roomData["title"].toString(),
       cover: roomStatus ? roomData["cover"]["url_list"][0].toString() : "",
+      areaName: roomStatus
+          ? roomData["partition_road_map"]["partition"]["title"].toString()
+          : "",
       userName: roomStatus
           ? owner["nickname"].toString()
           : userData["nickname"].toString(),
@@ -324,6 +330,9 @@ class DouyinSite implements LiveSite {
       roomId: webRid,
       title: room["title"].toString(),
       cover: roomStatus ? room["cover"]["url_list"][0].toString() : "",
+      areaName: roomStatus
+          ? roomData["partition_road_map"]["partition"]["title"].toString()
+          : "",
       userName: roomStatus
           ? owner["nickname"].toString()
           : anchor["nickname"].toString(),

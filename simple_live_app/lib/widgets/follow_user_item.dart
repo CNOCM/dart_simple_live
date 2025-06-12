@@ -64,6 +64,17 @@ class FollowUserItem extends StatelessWidget {
                               item.liveStatus.value == 2 ? null : Colors.grey,
                         ),
                       ),
+                      if (item.liveStatus.value == 2 &&
+                          item.liveAreaName.isNotEmpty) ...[
+                        AppStyle.hGap12,
+                        Text(
+                          item.liveAreaName,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.blueAccent,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -72,22 +83,38 @@ class FollowUserItem extends StatelessWidget {
           ],
         ),
       ),
-      subtitle: Row(
-        children: [
-          Image.asset(
-            site.logo,
-            width: 20,
-          ),
-          AppStyle.hGap4,
-          Text(
-            site.name,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Colors.grey,
+      subtitle: Obx(() {
+        final showLive = item.liveStatus.value == 2;
+        return Row(
+          children: [
+            Image.asset(
+              site.logo,
+              width: 20,
             ),
-          ),
-        ],
-      ),
+            AppStyle.hGap4,
+            Text(
+              site.name,
+              style: const TextStyle(
+                fontSize: 12,
+                color: Colors.grey,
+              ),
+            ),
+            if (showLive) ...[
+              AppStyle.hGap12,
+              Flexible(
+                child: Text(
+                  item.liveTitle,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.orange,
+                  ),
+                ),
+              ),
+            ]
+          ],
+        );
+      }),
       trailing: playing
           ? const SizedBox(
               width: 64,

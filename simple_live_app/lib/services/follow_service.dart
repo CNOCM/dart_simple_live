@@ -110,8 +110,11 @@ class FollowService extends GetxService {
   Future updateLiveStatus(FollowUser item) async {
     try {
       var site = Sites.allSites[item.siteId]!;
-      item.liveStatus.value =
-          (await site.liveSite.getLiveStatus(roomId: item.roomId)) ? 2 : 1;
+      var detail = await site.liveSite.getRoomDetail(roomId: item.roomId);
+
+      item.liveStatus.value = detail.status ? 2 : 1;
+      item.liveTitle = detail.title;
+      item.liveAreaName = detail.areaName;
     } catch (e) {
       Log.logPrint(e);
     } finally {

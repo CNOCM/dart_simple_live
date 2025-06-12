@@ -61,6 +61,7 @@ class LiveSite {
       title: '',
       url: '',
       userAvatar: '',
+      areaName: '',
       userName: '',
     ));
   }

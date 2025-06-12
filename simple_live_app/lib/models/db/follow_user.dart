@@ -33,6 +33,9 @@ class FollowUser {
   @HiveField(5)
   DateTime addTime;
 
+  String liveTitle = '';
+  String liveAreaName = '';
+
   /// 直播状态
   /// 0=未知(加载中) 1=未开播 2=直播中
   Rx<int> liveStatus = 0.obs;

@@ -256,6 +256,7 @@ class BiliBiliSite implements LiveSite {
       roomId: realRoomId,
       title: roomInfo["room_info"]["title"].toString(),
       cover: roomInfo["room_info"]["cover"].toString(),
+      areaName: roomInfo["room_info"]["area_name"].toString(),
       userName: roomInfo["anchor_info"]["base_info"]["uname"].toString(),
       userAvatar: "${roomInfo["anchor_info"]["base_info"]["face"]}@100w.jpg",
       online: asT<int?>(roomInfo["room_info"]["online"]) ?? 0,
