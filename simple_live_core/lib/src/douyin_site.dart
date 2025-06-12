@@ -223,9 +223,7 @@ class DouyinSite implements LiveSite {
       roomId: webRid,
       title: room["title"].toString(),
       cover: roomStatus ? room["cover"]["url_list"][0].toString() : "",
-      areaName: roomStatus
-          ? roomData["partition_road_map"]["partition"]["title"].toString()
-          : "",
+      areaName: "",
       userName: owner["nickname"].toString(),
       userAvatar: owner["avatar_thumb"]["url_list"][0].toString(),
       online: roomStatus
@@ -268,6 +266,16 @@ class DouyinSite implements LiveSite {
     var userData = data["user"];
     var roomId = roomData["id_str"].toString();
 
+    var partitionTitle =
+        data["partition_road_map"]?["partition"]?["title"]?.toString();
+    var subPartitionTitle = data["partition_road_map"]?["sub_partition"]
+            ?["partition"]?["title"]
+        ?.toString();
+
+    var areaName = (subPartitionTitle != null && subPartitionTitle.isNotEmpty)
+        ? subPartitionTitle
+        : (partitionTitle ?? "");
+
     // 读取用户唯一ID，用于弹幕连接
     // 似乎这个参数不是必须的，先随机生成一个
     //var userUniqueId = await _getUserUniqueId(webRid);
@@ -283,9 +291,7 @@ class DouyinSite implements LiveSite {
       roomId: webRid,
       title: roomData["title"].toString(),
       cover: roomStatus ? roomData["cover"]["url_list"][0].toString() : "",
-      areaName: roomStatus
-          ? roomData["partition_road_map"]["partition"]["title"].toString()
-          : "",
+      areaName: areaName,
       userName: roomStatus
           ? owner["nickname"].toString()
           : userData["nickname"].toString(),
@@ -330,9 +336,7 @@ class DouyinSite implements LiveSite {
       roomId: webRid,
       title: room["title"].toString(),
       cover: roomStatus ? room["cover"]["url_list"][0].toString() : "",
-      areaName: roomStatus
-          ? roomData["partition_road_map"]["partition"]["title"].toString()
-          : "",
+      areaName: "",
       userName: roomStatus
           ? owner["nickname"].toString()
           : anchor["nickname"].toString(),
@@ -585,8 +589,8 @@ class DouyinSite implements LiveSite {
       "round_trip_time": "100",
       "webid": "7382872326016435738",
     });
-    //var requlestUrl = await getAbogusUrl(uri.toString());
-    var requlestUrl = uri.toString();
+    //var requestUrl = await getAbogusUrl(uri.toString());
+    var requestUrl = uri.toString();
     var headResp = await HttpClient.instance
         .head('https://live.douyin.com', header: headers);
     var dyCookie = "";
@@ -601,7 +605,7 @@ class DouyinSite implements LiveSite {
     });
 
     var result = await HttpClient.instance.getJson(
-      requlestUrl,
+      requestUrl,
       queryParameters: {},
       header: {
         "Authority": 'www.douyin.com',
