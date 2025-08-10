@@ -17,20 +17,20 @@ class FollowUserAdapter extends TypeAdapter<FollowUser> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return FollowUser(
-      id: fields[0] as String,
-      roomId: fields[1] as String,
-      siteId: fields[2] as String,
-      userName: fields[3] as String,
-      face: fields[4] as String,
-      addTime: fields[5] as DateTime,
-      tag: fields[6] ?? "全部",
-    );
+        id: fields[0] as String,
+        roomId: fields[1] as String,
+        siteId: fields[2] as String,
+        userName: fields[3] as String,
+        face: fields[4] as String,
+        addTime: fields[5] as DateTime,
+        watchDuration: fields[6] as String?,
+        tag: fields[7] ?? "");
   }
 
   @override
   void write(BinaryWriter writer, FollowUser obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -44,6 +44,8 @@ class FollowUserAdapter extends TypeAdapter<FollowUser> {
       ..writeByte(5)
       ..write(obj.addTime)
       ..writeByte(6)
+      ..write(obj.watchDuration)
+      ..writeByte(7)
       ..write(obj.tag);
   }
 

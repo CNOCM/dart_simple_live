@@ -19,6 +19,8 @@ class AppSettingsController extends GetxController {
 
   var firstRun = false;
 
+  var dbVer = 0;
+
   @override
   void onInit() {
     themeMode.value = LocalStorageService.instance
@@ -126,7 +128,17 @@ class AppSettingsController extends GetxController {
 
     audioOutputDriver.value = LocalStorageService.instance.getValue(
       LocalStorageService.kAudioOutputDriver,
-      Platform.isAndroid ? "audiotrack" : Platform.isLinux ? "pulse" : Platform.isWindows ? "wasapi" : Platform.isIOS ? "audiounit" : Platform.isMacOS ? "coreaudio" : "sdl",
+      Platform.isAndroid
+          ? "audiotrack"
+          : Platform.isLinux
+              ? "pulse"
+              : Platform.isWindows
+                  ? "wasapi"
+                  : Platform.isIOS
+                      ? "audiounit"
+                      : Platform.isMacOS
+                          ? "coreaudio"
+                          : "sdl",
     );
 
     videoHardwareDecoder.value = LocalStorageService.instance.getValue(
@@ -142,6 +154,9 @@ class AppSettingsController extends GetxController {
 
     updateFollowThreadCount.value = LocalStorageService.instance
         .getValue(LocalStorageService.kUpdateFollowThreadCount, 4);
+
+    dbVer = LocalStorageService.instance
+        .getValue(LocalStorageService.kHiveDbVer, 10708);
 
     initSiteSort();
     initHomeSort();

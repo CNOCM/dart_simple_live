@@ -28,6 +28,9 @@ class LiveMessage {
   /// 单Type=Online时，Data为人气值(long)
   final dynamic data;
 
+  /// 弹幕表情图片 URL 列表
+  final List<String>? imageUrls;
+
   /// 弹幕颜色
   final LiveMessageColor color;
   LiveMessage({
@@ -36,6 +39,7 @@ class LiveMessage {
     required this.message,
     this.data,
     required this.color,
+    this.imageUrls,
   });
 
   @override
@@ -44,9 +48,20 @@ class LiveMessage {
       "type": type.index,
       "userName": userName,
       "message": message,
-      "data": data.toString(),
+      "data": data?.toString(),
       "color": color.toString(),
+      "imageUrls": imageUrls,
     });
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'type': type.toString(),
+      'userName': userName,
+      'message': message,
+      'color': color.toString(),
+      'imageUrls': imageUrls,
+    };
   }
 }
 

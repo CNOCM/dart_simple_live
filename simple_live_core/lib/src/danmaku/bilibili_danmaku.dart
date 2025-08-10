@@ -5,7 +5,6 @@ import 'dart:typed_data';
 
 import 'package:brotli/brotli.dart';
 import 'package:simple_live_core/simple_live_core.dart';
-import 'package:simple_live_core/src/common/convert_helper.dart';
 import 'package:simple_live_core/src/common/web_socket_util.dart';
 
 import '../common/binary_writer.dart';
@@ -51,12 +50,12 @@ class BiliBiliDanmaku implements LiveDanmaku {
 
   //String serverUrl = "wss://broadcastlv.chat.bilibili.com/sub";
 
-  WebScoketUtils? webScoketUtils;
+  WebSocketUtils? webSocketUtils;
   late BiliBiliDanmakuArgs danmakuArgs;
   @override
   Future start(dynamic args) async {
     danmakuArgs = args as BiliBiliDanmakuArgs;
-    webScoketUtils = WebScoketUtils(
+    webSocketUtils = WebSocketUtils(
       url: "wss://${args.serverHost}/sub",
       heartBeatTime: heartbeatTime,
       headers: args.cookie.isEmpty
@@ -81,7 +80,7 @@ class BiliBiliDanmaku implements LiveDanmaku {
         onClose?.call("服务器连接失败$e");
       },
     );
-    webScoketUtils?.connect();
+    webSocketUtils?.connect();
   }
 
   void joinRoom(BiliBiliDanmakuArgs args) {
@@ -97,12 +96,12 @@ class BiliBiliDanmaku implements LiveDanmaku {
       }),
       7,
     );
-    webScoketUtils?.sendMessage(joinData);
+    webSocketUtils?.sendMessage(joinData);
   }
 
   @override
   void heartbeat() {
-    webScoketUtils?.sendMessage(encodeData(
+    webSocketUtils?.sendMessage(encodeData(
       "",
       2,
     ));
@@ -112,7 +111,7 @@ class BiliBiliDanmaku implements LiveDanmaku {
   Future stop() async {
     onMessage = null;
     onClose = null;
-    webScoketUtils?.close();
+    webSocketUtils?.close();
   }
 
   List<int> encodeData(String msg, int action) {
@@ -187,44 +186,44 @@ class BiliBiliDanmaku implements LiveDanmaku {
   void parseMessage(String jsonMessage) {
     try {
       var obj = json.decode(jsonMessage);
-      var cmd = obj["cmd"].toString();
+      var cmd = obj["cmd"]?.toString() ?? '';
       if (cmd.contains("DANMU_MSG")) {
-        if (obj["info"] != null && obj["info"].length != 0) {
-          var message = obj["info"][1].toString();
-          var color = asT<int?>(obj["info"][0][3]) ?? 0;
-          if (obj["info"][2] != null && obj["info"][2].length != 0) {
-            var username = obj["info"][2][1].toString();
-            var liveMsg = LiveMessage(
-              type: LiveMessageType.chat,
-              userName: username,
-              message: message,
-              color: color == 0
-                  ? LiveMessageColor.white
-                  : LiveMessageColor.numberToColor(color),
-            );
-            onMessage?.call(liveMsg);
-          }
-        }
-      } else if (cmd == "SUPER_CHAT_MESSAGE") {
-        if (obj["data"] == null) {
-          return;
-        }
-        LiveSuperChatMessage sc = LiveSuperChatMessage(
-          backgroundBottomColor:
-              obj["data"]["background_bottom_color"].toString(),
-          backgroundColor: obj["data"]["background_color"].toString(),
-          endTime: DateTime.fromMillisecondsSinceEpoch(
-            obj["data"]["end_time"] * 1000,
-          ),
-          face: "${obj["data"]["user_info"]["face"]}@200w.jpg",
-          message: obj["data"]["message"].toString(),
-          price: obj["data"]["price"],
-          startTime: DateTime.fromMillisecondsSinceEpoch(
-            obj["data"]["start_time"] * 1000,
-          ),
-          userName: obj["data"]["user_info"]["uname"].toString(),
+        final info = obj["info"];
+        if (info == null || info.length == 0) return;
+
+        final message = info[1].toString();
+        final color = info[0][3];
+        final username = info[2][1].toString();
+        final imageUrls = _extractImageUrls(info);
+
+        final liveMsg = LiveMessage(
+          type: LiveMessageType.chat,
+          userName: username,
+          message: message,
+          color: color == 0
+              ? LiveMessageColor.white
+              : LiveMessageColor.numberToColor(color),
+          imageUrls: imageUrls,
         );
-        var liveMsg = LiveMessage(
+
+        onMessage?.call(liveMsg);
+      } else if (cmd == "SUPER_CHAT_MESSAGE") {
+        final data = obj["data"];
+        if (data == null) return;
+
+        final sc = LiveSuperChatMessage(
+          backgroundBottomColor: data["background_bottom_color"].toString(),
+          backgroundColor: data["background_color"].toString(),
+          endTime: DateTime.fromMillisecondsSinceEpoch(data["end_time"] * 1000),
+          face: "${data["user_info"]["face"]}@200w.jpg",
+          message: data["message"].toString(),
+          price: data["price"],
+          startTime:
+              DateTime.fromMillisecondsSinceEpoch(data["start_time"] * 1000),
+          userName: data["user_info"]["uname"].toString(),
+        );
+
+        final liveMsg = LiveMessage(
           type: LiveMessageType.superChat,
           userName: "SUPER_CHAT_MESSAGE",
           message: "SUPER_CHAT_MESSAGE",
@@ -236,6 +235,42 @@ class BiliBiliDanmaku implements LiveDanmaku {
     } catch (e) {
       CoreLog.error(e);
     }
+  }
+
+  List<String>? _extractImageUrls(List<dynamic> info) {
+    List<String>? imageUrls;
+
+    try {
+      // 情况1：直接在 info[0][13]["url"]
+      final raw13 = info[0][13];
+      if (raw13 is Map && raw13["url"] is String) {
+        imageUrls ??= [];
+        imageUrls.add(raw13["url"]);
+      }
+
+      // 情况2：info[0][15]["extra"] 解析 emots
+      final extraStr = info[0][15]?["extra"];
+      if (extraStr is String) {
+        final extra = json.decode(extraStr);
+        final emots = extra["emots"];
+        if (emots != null && emots is Map) {
+          imageUrls ??= [];
+
+          final message = info[1].toString();
+          final matches = RegExp(r'\[[^\[\]]+\]').allMatches(message);
+          for (final match in matches) {
+            final key = match.group(0);
+            if (key != null &&
+                emots.containsKey(key) &&
+                emots[key]["url"] != null) {
+              imageUrls.add(emots[key]["url"]);
+            }
+          }
+        }
+      }
+    } catch (_) {}
+
+    return imageUrls;
   }
 
   int readInt(List<int> buffer, int start, int len) {

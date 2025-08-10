@@ -12,7 +12,9 @@ class HuyaSite implements LiveSite {
   final String kUserAgent =
       "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36 Edg/117.0.0.0";
   final BaseTarsHttp tupClient = BaseTarsHttp("http://wup.huya.com", "liveui");
-  String? playUserAgent;
+
+  String? playHuyaUA;
+
   @override
   String id = "huya";
 
@@ -23,7 +25,7 @@ class HuyaSite implements LiveSite {
   LiveDanmaku getDanmaku() => HuyaDanmaku();
 
   @override
-  Future<List<LiveCategory>> getCategores() async {
+  Future<List<LiveCategory>> getCategories() async {
     List<LiveCategory> categories = [
       LiveCategory(id: "1", name: "网游", children: []),
       LiveCategory(id: "2", name: "单机", children: []),
@@ -32,13 +34,13 @@ class HuyaSite implements LiveSite {
     ];
 
     for (var item in categories) {
-      var items = await getSubCategores(item.id);
+      var items = await getSubCategories(item.id);
       item.children.addAll(items);
     }
     return categories;
   }
 
-  Future<List<LiveSubCategory>> getSubCategores(String id) async {
+  Future<List<LiveSubCategory>> getSubCategories(String id) async {
     var result = await HttpClient.instance.getJson(
       "https://live.cdn.huya.com/liveconfig/game/bussLive",
       queryParameters: {
@@ -111,7 +113,7 @@ class HuyaSite implements LiveSite {
   }
 
   @override
-  Future<List<LivePlayQuality>> getPlayQualites(
+  Future<List<LivePlayQuality>> getPlayQualities(
       {required LiveRoomDetail detail}) {
     List<LivePlayQuality> qualities = <LivePlayQuality>[];
     var urlData = detail.data as HuyaUrlDataModel;
@@ -172,24 +174,21 @@ class HuyaSite implements LiveSite {
     return Future.value(qualities);
   }
 
-  // 每次访问播放虎牙都需要获取一次，不太合理，倾向于在客户端获取保存替换
   Future<String> getHuYaUA() async {
-    if (playUserAgent != null) {
-      return playUserAgent!;
-    }
-    try {
-      var result = await HttpClient.instance.getJson(
-        "https://github.iill.moe/xiaoyaocz/dart_simple_live/master/assets/play_config.json",
-        queryParameters: {
-          "ts": DateTime.now().millisecondsSinceEpoch,
-        },
-      );
-      playUserAgent = json.decode(result)['huya']['user_agent'];
-    } catch (e) {
-      CoreLog.error(e);
-    }
-    return playUserAgent ??
-        "HYSDK(Windows, 30000002)_APP(pc_exe&6080100&official)_SDK(trans&2.23.0.4969)";
+    // Date: 2025-06-25
+    // from biliup
+    // "sdk_platform": "Android, Windows"
+    // "sdk_version": "30000002"
+    // "media_platform": "android"
+    // "media_version": "20000313"
+    // "app_platform": "adr,huya_nftv, pc_exe, webh5"
+    // "app_version": "adr/nftv: LocalVersion or "0.0.0" + hotfix_version, pc_exe: 6080100, ws: 2505091506"
+    // "app_channel": "adr: live, nftv/pc_exe: official, websocket"
+    // "trans_mod_name": "trans"
+    // "trans_mod_version": "nftv: 1.24.99-rel-tv, adr: 2.22.13-rel, win: 2.23.0.4969"
+    // user_agent = "HYSDK($sdk_platform,$sdk_version)"
+    // user_agent = "media_platform,media_version_APP($app_platform&$app_version&$app_channe)_SDK($trans_mod_name&$trans_mod_version)"
+    return "HYSDK(Windows, 30000002)_APP(pc_exe&6090007&official)_SDK(trans&2.24.0.5157)";
   }
 
   @override
@@ -271,7 +270,7 @@ class HuyaSite implements LiveSite {
       title = tLiveInfo["sRoomName"]?.toString() ?? "";
     }
     var huyaLines = <HuyaLineModel>[];
-    var huyaBiterates = <HuyaBitRateModel>[];
+    var huyaBitrate = <HuyaBitRateModel>[];
     //读取可用线路
     var lines = tLiveInfo["tLiveStreamInfo"]["vStreamInfo"]["value"];
     for (var item in lines) {
@@ -288,13 +287,13 @@ class HuyaSite implements LiveSite {
     }
 
     //清晰度
-    var biterates = tLiveInfo["tLiveStreamInfo"]["vBitRateInfo"]["value"];
-    for (var item in biterates) {
+    var bitRates = tLiveInfo["tLiveStreamInfo"]["vBitRateInfo"]["value"];
+    for (var item in bitRates) {
       var name = item["sDisplayName"].toString();
       if (name.contains("HDR")) {
         continue;
       }
-      huyaBiterates.add(HuyaBitRateModel(
+      huyaBitrate.add(HuyaBitRateModel(
         bitRate: item["iBitRate"],
         name: name,
       ));
@@ -308,6 +307,7 @@ class HuyaSite implements LiveSite {
       online: tLiveInfo["lTotalCount"],
       roomId: tLiveInfo["lProfileRoom"].toString(),
       title: title,
+      areaName: tLiveInfo["sGameFullName"].toString(),
       userName: tProfileInfo["sNick"].toString(),
       userAvatar: tProfileInfo["sAvatar180"].toString(),
       introduction: tLiveInfo["sIntroduction"].toString(),
@@ -317,7 +317,7 @@ class HuyaSite implements LiveSite {
         url:
             "https:${utf8.decode(base64.decode(roomInfo["roomProfile"]["liveLineUrl"].toString()))}",
         lines: huyaLines,
-        bitRates: huyaBiterates,
+        bitRates: huyaBitrate,
         uid: getUid(t: 13, e: 10),
       ),
       danmakuData: HuyaDanmakuArgs(

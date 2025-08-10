@@ -113,19 +113,20 @@ class SettingsPage extends GetView<SettingsController> {
             ],
           ),
           Expanded(
-              child: SizedBox(
-            width: 800.w,
-            child: TabBarView(
-              controller: controller.tabController,
-              children: [
-                buildPlayerSettings(),
-                buildDanmakuSettings(),
-                buildFollowSettings(),
-                buildAccountSettings(),
-                buildAbout(),
-              ],
+            child: SizedBox(
+              width: 800.w,
+              child: TabBarView(
+                controller: controller.tabController,
+                children: [
+                  buildPlayerSettings(),
+                  buildDanmakuSettings(),
+                  buildFollowSettings(),
+                  buildAccountSettings(),
+                  buildAbout(),
+                ],
+              ),
             ),
-          )),
+          ),
         ],
       ),
     );
@@ -137,51 +138,42 @@ class SettingsPage extends GetView<SettingsController> {
       children: [
         Obx(
           () => SettingsItemWidget(
-            foucsNode: controller.hardwareDecodeFocusNode,
-            autofocus: controller.hardwareDecodeFocusNode.isFoucsed.value,
+            focusNode: controller.hardwareDecodeFocusNode,
+            autofocus: controller.hardwareDecodeFocusNode.isFocused.value,
             title: "硬件解码",
-            items: const {
-              0: "关",
-              1: "开",
-            },
+            items: const {0: "关", 1: "开"},
             value: AppSettingsController.instance.hardwareDecode.value ? 1 : 0,
             onChanged: (e) {
-              AppSettingsController.instance
-                  .setHardwareDecode(e == 1 ? true : false);
+              AppSettingsController.instance.setHardwareDecode(
+                e == 1 ? true : false,
+              );
             },
           ),
         ),
         AppStyle.vGap24,
         Obx(
           () => SettingsItemWidget(
-            foucsNode: controller.compatibleModeFocusNode,
-            autofocus: controller.compatibleModeFocusNode.isFoucsed.value,
+            focusNode: controller.compatibleModeFocusNode,
+            autofocus: controller.compatibleModeFocusNode.isFocused.value,
             title: "兼容模式",
-            items: const {
-              0: "关",
-              1: "开",
-            },
-            value:
-                AppSettingsController.instance.playerCompatMode.value ? 1 : 0,
+            items: const {0: "关", 1: "开"},
+            value: AppSettingsController.instance.playerCompatMode.value
+                ? 1
+                : 0,
             onChanged: (e) {
-              AppSettingsController.instance
-                  .setPlayerCompatMode(e == 1 ? true : false);
+              AppSettingsController.instance.setPlayerCompatMode(
+                e == 1 ? true : false,
+              );
             },
           ),
         ),
         AppStyle.vGap24,
         Obx(
           () => SettingsItemWidget(
-            foucsNode: controller.scaleFoucsNode,
-            autofocus: controller.scaleFoucsNode.isFoucsed.value,
+            focusNode: controller.scaleFocusNode,
+            autofocus: controller.scaleFocusNode.isFocused.value,
             title: "画面比例",
-            items: const {
-              0: "适应",
-              1: "拉伸",
-              2: "铺满",
-              3: "16:9",
-              4: "4:3",
-            },
+            items: const {0: "适应", 1: "拉伸", 2: "铺满", 3: "16:9", 4: "4:3"},
             value: AppSettingsController.instance.scaleMode.value,
             onChanged: (e) {
               AppSettingsController.instance.setScaleMode(e);
@@ -191,14 +183,10 @@ class SettingsPage extends GetView<SettingsController> {
         AppStyle.vGap24,
         Obx(
           () => SettingsItemWidget(
-            foucsNode: controller.defaultQualityFocusNode,
-            autofocus: controller.defaultQualityFocusNode.isFoucsed.value,
+            focusNode: controller.defaultQualityFocusNode,
+            autofocus: controller.defaultQualityFocusNode.isFocused.value,
             title: "默认清晰度",
-            items: const {
-              0: "最低画质",
-              1: "中等画质",
-              2: "最高画质",
-            },
+            items: const {0: "最低画质", 1: "中等画质", 2: "最高画质"},
             value: AppSettingsController.instance.qualityLevel.value,
             onChanged: (e) {
               AppSettingsController.instance.setQualityLevel(e);
@@ -215,20 +203,18 @@ class SettingsPage extends GetView<SettingsController> {
       children: [
         Obx(
           () => SettingsItemWidget(
-            foucsNode: controller.autoUpdateFollowEnableFocusNode,
+            focusNode: controller.autoUpdateFollowEnableFocusNode,
             autofocus:
-                controller.autoUpdateFollowEnableFocusNode.isFoucsed.value,
+                controller.autoUpdateFollowEnableFocusNode.isFocused.value,
             title: "自动更新关注",
-            items: const {
-              0: "关",
-              1: "开",
-            },
+            items: const {0: "关", 1: "开"},
             value: AppSettingsController.instance.autoUpdateFollowEnable.value
                 ? 1
                 : 0,
             onChanged: (e) {
-              AppSettingsController.instance
-                  .setAutoUpdateFollowEnable(e == 1 ? true : false);
+              AppSettingsController.instance.setAutoUpdateFollowEnable(
+                e == 1 ? true : false,
+              );
               FollowUserService.instance.initTimer();
             },
           ),
@@ -236,9 +222,9 @@ class SettingsPage extends GetView<SettingsController> {
         AppStyle.vGap24,
         Obx(
           () => SettingsItemWidget(
-            foucsNode: controller.autoUpdateFollowDurationFocusNode,
+            focusNode: controller.autoUpdateFollowDurationFocusNode,
             autofocus:
-                controller.autoUpdateFollowDurationFocusNode.isFoucsed.value,
+                controller.autoUpdateFollowDurationFocusNode.isFocused.value,
             title: "自动更新间隔",
             items: const {
               5: "5分钟",
@@ -260,8 +246,8 @@ class SettingsPage extends GetView<SettingsController> {
         AppStyle.vGap24,
         Obx(
           () => SettingsItemWidget(
-            foucsNode: controller.updateFollowThreadFocusNode,
-            autofocus: controller.updateFollowThreadFocusNode.isFoucsed.value,
+            focusNode: controller.updateFollowThreadFocusNode,
+            autofocus: controller.updateFollowThreadFocusNode.isFocused.value,
             title: "更新线程数",
             items: const {
               1: "1",
@@ -289,13 +275,10 @@ class SettingsPage extends GetView<SettingsController> {
       children: [
         Obx(
           () => SettingsItemWidget(
-            foucsNode: controller.danmakuFoucsNode,
-            autofocus: controller.danmakuFoucsNode.isFoucsed.value,
+            focusNode: controller.danmakuFocusNode,
+            autofocus: controller.danmakuFocusNode.isFocused.value,
             title: "弹幕开关",
-            items: const {
-              0: "关",
-              1: "开",
-            },
+            items: const {0: "关", 1: "开"},
             value: AppSettingsController.instance.danmuEnable.value ? 1 : 0,
             onChanged: (e) {
               AppSettingsController.instance.setDanmuEnable(e == 1);
@@ -305,8 +288,8 @@ class SettingsPage extends GetView<SettingsController> {
         AppStyle.vGap24,
         Obx(
           () => SettingsItemWidget(
-            foucsNode: controller.danmakuSizeFoucsNode,
-            autofocus: controller.danmakuSizeFoucsNode.isFoucsed.value,
+            focusNode: controller.danmakuSizeFocusNode,
+            autofocus: controller.danmakuSizeFocusNode.isFocused.value,
             title: "弹幕大小",
             items: {
               24.0: "24",
@@ -326,8 +309,8 @@ class SettingsPage extends GetView<SettingsController> {
         AppStyle.vGap24,
         Obx(
           () => SettingsItemWidget(
-            foucsNode: controller.danmakuSpeedFoucsNode,
-            autofocus: controller.danmakuSpeedFoucsNode.isFoucsed.value,
+            focusNode: controller.danmakuSpeedFocusNode,
+            autofocus: controller.danmakuSpeedFocusNode.isFocused.value,
             title: "弹幕速度",
             items: {
               18.0: "很慢",
@@ -347,15 +330,10 @@ class SettingsPage extends GetView<SettingsController> {
         AppStyle.vGap24,
         Obx(
           () => SettingsItemWidget(
-            foucsNode: controller.danmakuAreaFoucsNode,
-            autofocus: controller.danmakuAreaFoucsNode.isFoucsed.value,
+            focusNode: controller.danmakuAreaFocusNode,
+            autofocus: controller.danmakuAreaFocusNode.isFocused.value,
             title: "显示区域",
-            items: {
-              0.25: "1/4",
-              0.5: "1/2",
-              0.75: "3/4",
-              1.0: "全屏",
-            },
+            items: {0.25: "1/4", 0.5: "1/2", 0.75: "3/4", 1.0: "全屏"},
             value: AppSettingsController.instance.danmuArea.value,
             onChanged: (e) {
               AppSettingsController.instance.setDanmuArea(e);
@@ -365,8 +343,8 @@ class SettingsPage extends GetView<SettingsController> {
         AppStyle.vGap24,
         Obx(
           () => SettingsItemWidget(
-            foucsNode: controller.danmakuOpacityFoucsNode,
-            autofocus: controller.danmakuOpacityFoucsNode.isFoucsed.value,
+            focusNode: controller.danmakuOpacityFocusNode,
+            autofocus: controller.danmakuOpacityFocusNode.isFocused.value,
             title: "不透明度",
             items: {
               0.1: "10%",
@@ -389,8 +367,8 @@ class SettingsPage extends GetView<SettingsController> {
         AppStyle.vGap24,
         Obx(
           () => SettingsItemWidget(
-            foucsNode: controller.danmakuStorkeFoucsNode,
-            autofocus: controller.danmakuStorkeFoucsNode.isFoucsed.value,
+            focusNode: controller.danmakuStrokeFocusNode,
+            autofocus: controller.danmakuStrokeFocusNode.isFocused.value,
             title: "描边宽度",
             items: {
               2.0: "2",
@@ -418,10 +396,10 @@ class SettingsPage extends GetView<SettingsController> {
       children: [
         Obx(
           () => HighlightListTile(
-            focusNode: controller.bilibiliFoucsNode,
-            autofocus: controller.bilibiliFoucsNode.isFoucsed.value,
+            focusNode: controller.bilibiliFocusNode,
+            autofocus: controller.bilibiliFocusNode.isFocused.value,
             title: "哔哩哔哩账号",
-            subtitle: BiliBiliAccountService.instance.logined.value
+            subtitle: BiliBiliAccountService.instance.logged.value
                 ? "已登录：${BiliBiliAccountService.instance.name.value}"
                 : "未登录，点击登录",
             leading: Image.asset(
@@ -473,7 +451,7 @@ class SettingsPage extends GetView<SettingsController> {
           onTap: () {
             SmartDialog.showToast("无需登录抖音，您可以直接观看直播");
           },
-        )
+        ),
       ],
     );
   }
@@ -486,7 +464,7 @@ class SettingsPage extends GetView<SettingsController> {
           focusNode: controller.versionFocusNode,
           title: "版本",
           subtitle: "v${Utils.packageInfo.version}",
-          onTap: ()=>{},
+          onTap: controller.checkUpdate,
         ),
       ],
     );

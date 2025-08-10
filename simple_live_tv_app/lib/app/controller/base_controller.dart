@@ -9,10 +9,10 @@ import 'package:get/get.dart';
 
 class BaseController extends GetxController {
   /// 加载中，更新页面
-  var pageLoadding = false.obs;
+  var pageLoading = false.obs;
 
   /// 加载中
-  var loadding = false.obs;
+  var loading = false.obs;
 
   /// 空白页面
   var pageEmpty = false.obs;
@@ -74,12 +74,12 @@ class BasePageController<T> extends BaseController {
 
   Future loadData() async {
     try {
-      if (loadding.value) return;
-      loadding.value = true;
+      if (loading.value) return;
+      loading.value = true;
       pageError.value = false;
       pageEmpty.value = false;
       notLogin.value = false;
-      pageLoadding.value = currentPage == 1;
+      pageLoading.value = currentPage == 1;
 
       var result = await getData(currentPage, pageSize);
       //是否可以加载更多
@@ -102,8 +102,8 @@ class BasePageController<T> extends BaseController {
     } catch (e) {
       handleError(e, showPageError: currentPage == 1);
     } finally {
-      loadding.value = false;
-      pageLoadding.value = false;
+      loading.value = false;
+      pageLoading.value = false;
     }
   }
 

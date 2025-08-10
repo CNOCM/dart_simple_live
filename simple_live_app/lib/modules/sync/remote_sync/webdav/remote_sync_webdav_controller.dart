@@ -19,10 +19,11 @@ import 'package:simple_live_app/app/utils/document.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/follow_user_tag.dart';
 import 'package:simple_live_app/models/db/history.dart';
-import 'package:simple_live_app/modules/sync/remote_sync/webdav/webdav_client.dart';
+import 'package:simple_live_app/requests/webdav_client.dart';
 import 'package:simple_live_app/services/bilibili_account_service.dart';
 import 'package:simple_live_app/services/db_service.dart';
 import 'package:simple_live_app/services/local_storage_service.dart';
+import 'package:simple_live_app/services/migration_service.dart';
 
 class RemoteSyncWebDAVController extends BaseController {
   // ui
@@ -42,8 +43,8 @@ class RemoteSyncWebDAVController extends BaseController {
   final _userHistoriesJsonName = 'SimpleLive_histories.json';
   final _userBlockedWordJsonName = 'SimpleLive_blocked_word.json';
   final _userBilibiliAccountJsonName = 'SimpleLive_bilibili_account.json';
-  final _userSettingsJsonName = 'SimpleLive_Settings.json';
   final _userTagsJsonName = 'SimpleLive_Tags.json';
+  final _userSettingsJsonName = 'SimpleLive_Settings.json';
 
   @override
   void onInit() {
@@ -179,13 +180,11 @@ class RemoteSyncWebDAVController extends BaseController {
       await userFollowJsonFile.writeAsString(jsonEncode(dataFollowsMap));
       // 用户自定义标签
       var userTagsList = DBService.instance.getFollowTagList();
-      var dataTagsMap = {
-        'data': userTagsList.map((e) => e.toJson()).toList()
-      };
+      var dataTagsMap = {'data': userTagsList.map((e) => e.toJson()).toList()};
       var userTagsJsonFile = File(join(profile.path, _userTagsJsonName));
       await userTagsJsonFile.writeAsString(jsonEncode(dataTagsMap));
       // histories
-      var userHistoriesList = DBService.instance.getHistores();
+      var userHistoriesList = DBService.instance.getHistories();
       var dataHistoriesMap = {
         'data': userHistoriesList.map((e) => e.toJson()).toList()
       };
@@ -209,14 +208,15 @@ class RemoteSyncWebDAVController extends BaseController {
           File(join(profile.path, _userBilibiliAccountJsonName));
       await bilibiliAccountJsonFile
           .writeAsString(jsonEncode(userBiliAccountCookieMap));
-      // settings
+      await userTagsJsonFile.writeAsString(jsonEncode(dataTagsMap));
+      // 同步所有设置
       var settingList = LocalStorageService.instance.settingsBox.toMap();
       var dataSettingListMap = {'data': settingList};
       final settingJsonFile = File(join(profile.path, _userSettingsJsonName));
       await settingJsonFile.writeAsString(jsonEncode(dataSettingListMap));
 
       // 遍历profile路径下的所有文件压缩
-      await archive.addDirectoryToArchive(profile.path, profile.path);
+      archive.addDirectoryToArchive(profile.path, profile.path);
       final zipEncoder = ZipEncoder();
       zipBytes = zipEncoder.encode(archive) ?? [];
       profile.clearSync();
@@ -238,6 +238,8 @@ class RemoteSyncWebDAVController extends BaseController {
     for (ArchiveFile file in archive) {
       await _recovery(file);
     }
+    // 旧版本备份需要迁移
+    MigrationService.migrateDataByVersion();
     SmartDialog.dismiss();
     SmartDialog.showToast('同步完成');
     DateTime recoverTime = DateTime.now();
@@ -247,13 +249,14 @@ class RemoteSyncWebDAVController extends BaseController {
         recoverTime.millisecondsSinceEpoch);
   }
 
+  // todo: 后续迁出实现无感同步
   Future<void> _recovery(ArchiveFile file) async {
     if (file.isFile && file.name.endsWith('.json')) {
       var jsonString = utf8.decode(file.content);
       var jsonData = json.decode(jsonString)['data'];
       // 同步follows
       if (file.name == _userFollowJsonName && isSyncFollows.value) {
-        // 当前云优先
+        // 修改为多端一致
         try {
           // 清空本地关注列表
           await DBService.instance.followBox.clear();
@@ -270,13 +273,7 @@ class RemoteSyncWebDAVController extends BaseController {
         try {
           for (var item in jsonData) {
             var history = History.fromJson(item);
-            if (DBService.instance.historyBox.containsKey(history.id)) {
-              var old = DBService.instance.historyBox.get(history.id);
-              //如果本地的更新时间比较新，就不更新
-              if (old!.updateTime.isAfter(history.updateTime)) {
-                continue;
-              }
-            }
+            // 完全同步机制
             await DBService.instance.addOrUpdateHistory(history);
           }
           Log.i('已同步用户观看历史记录');
@@ -303,6 +300,21 @@ class RemoteSyncWebDAVController extends BaseController {
         } catch (e) {
           Log.e('同步哔哩哔哩账号失败：$e', StackTrace.current);
         }
+      } else if (file.name == _userTagsJsonName) {
+        try {
+          // 清空本地标签列表
+          await DBService.instance.tagBox.clear();
+          for (var item in jsonData) {
+            var tag = FollowUserTag.fromJson(item);
+            await DBService.instance.tagBox.put(tag.id, tag);
+            // 插入之后验证
+            var insertedTag = DBService.instance.tagBox.get(tag.id);
+            Log.i('Inserted tag: ${insertedTag?.tag}');
+          }
+          Log.i('已同步用户自定义标签');
+        } catch (e) {
+          Log.e('同步用户自定义标签失败:$e', StackTrace.current);
+        }
       } else if (file.name == _userSettingsJsonName) {
         try {
           await LocalStorageService.instance.settingsBox.clear();
@@ -311,7 +323,7 @@ class RemoteSyncWebDAVController extends BaseController {
         } catch (e) {
           Log.e("同步用户设置失败：$e", StackTrace.current);
         }
-      }else if (file.name == _userTagsJsonName && isSyncFollows.value) {
+      } else if (file.name == _userTagsJsonName && isSyncFollows.value) {
         try {
           // 标签功能和关注具有依赖关系，必须同时同步
           // 清空本地标签列表
@@ -323,12 +335,11 @@ class RemoteSyncWebDAVController extends BaseController {
             var insertedTag = DBService.instance.tagBox.get(tag.id);
             Log.i('Inserted tag: ${insertedTag?.tag}');
           }
-          EventBus.instance.emit(Constant.kUpdateFollow, 0);
           Log.i('已同步用户自定义标签');
         } catch (e) {
-          Log.e('同步用户自定义标签失败:$e',StackTrace.current);
+          Log.e('同步用户自定义标签失败:$e', StackTrace.current);
         }
-      }  else {
+      } else {
         return;
       }
     } else {

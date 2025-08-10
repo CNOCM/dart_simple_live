@@ -8,10 +8,10 @@ import 'package:simple_live_app/app/app_style.dart';
 import 'package:simple_live_app/modules/search/douyin/douyin_search_controller.dart';
 import 'package:simple_live_app/routes/app_navigation.dart';
 import 'package:simple_live_app/widgets/keep_alive_wrapper.dart';
-import 'package:simple_live_app/widgets/status/app_loadding_widget.dart';
+import 'package:simple_live_app/widgets/status/app_loading_widget.dart';
 
 class DouyinSearchView extends StatelessWidget {
-  const DouyinSearchView({Key? key}) : super(key: key);
+  const DouyinSearchView({super.key});
   DouyinSearchController get controller => Get.find<DouyinSearchController>();
 
   @override
@@ -53,13 +53,11 @@ class DouyinSearchView extends StatelessWidget {
               onWebViewCreated: controller.onWebViewCreated,
               onLoadStop: controller.onLoadStop,
               onLoadStart: controller.onLoadStart,
-              initialOptions: InAppWebViewGroupOptions(
-                crossPlatform: InAppWebViewOptions(
-                  useOnLoadResource: true,
-                  userAgent:
-                      "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1 Edg/118.0.0.0",
-                  useShouldOverrideUrlLoading: true,
-                ),
+              initialSettings: InAppWebViewSettings(
+                useOnLoadResource: true,
+                userAgent:
+                    "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1 Edg/118.0.0.0",
+                useShouldOverrideUrlLoading: true,
               ),
               onCreateWindow: controller.onCreateWindow,
               shouldOverrideUrlLoading:
@@ -81,8 +79,8 @@ class DouyinSearchView extends StatelessWidget {
             ),
           Obx(
             () => Visibility(
-              visible: controller.pageLoadding.value,
-              child: const AppLoaddingWidget(),
+              visible: controller.pageLoading.value,
+              child: const AppLoadingWidget(),
             ),
           ),
         ],

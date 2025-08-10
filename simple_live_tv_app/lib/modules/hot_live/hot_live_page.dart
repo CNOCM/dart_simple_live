@@ -45,7 +45,7 @@ class HotLivePage extends GetView<HotliveController> {
               const Spacer(),
               Obx(
                 () => Visibility(
-                  visible: controller.loadding.value,
+                  visible: controller.loading.value,
                   child: SizedBox(
                     width: 48.w,
                     height: 48.w,
@@ -76,11 +76,7 @@ class HotLivePage extends GetView<HotliveController> {
                 .map(
                   (e) => Obx(
                     () => HighlightButton(
-                      icon: Image.asset(
-                        e.logo,
-                        width: 48.w,
-                        height: 48.w,
-                      ),
+                      icon: Image.asset(e.logo, width: 48.w, height: 48.w),
                       text: e.name,
                       selected: controller.siteId.value == e.id,
                       focusNode: AppFocusNode(),

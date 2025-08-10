@@ -32,6 +32,7 @@ class BiliBiliSite implements LiveSite {
   static const String kDefaultUserAgent =
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 Edg/126.0.0.0";
   static const String kDefaultReferer = "https://live.bilibili.com/";
+  static const String kUserID = "1";
 
   String buvid3 = "";
   String buvid4 = "";
@@ -46,19 +47,19 @@ class BiliBiliSite implements LiveSite {
         ? {
             "user-agent": kDefaultUserAgent,
             "referer": kDefaultReferer,
-            "cookie": 'buvid3=$buvid3;buvid4=$buvid4;',
+            "cookie": 'buvid3=$buvid3;buvid4=$buvid4;DedeUserID=$kUserID;',
           }
         : {
             "cookie": cookie.contains("buvid3")
                 ? cookie
-                : "$cookie;buvid3=$buvid3;buvid4=$buvid4;",
+                : "$cookie;buvid3=$buvid3;buvid4=$buvid4;DedeUserID=$kUserID;",
             "user-agent": kDefaultUserAgent,
             "referer": kDefaultReferer,
           };
   }
 
   @override
-  Future<List<LiveCategory>> getCategores() async {
+  Future<List<LiveCategory>> getCategories() async {
     List<LiveCategory> categories = [];
     var result = await HttpClient.instance.getJson(
       "https://api.live.bilibili.com/room/v1/Area/getList",
@@ -122,7 +123,7 @@ class BiliBiliSite implements LiveSite {
   }
 
   @override
-  Future<List<LivePlayQuality>> getPlayQualites(
+  Future<List<LivePlayQuality>> getPlayQualities(
       {required LiveRoomDetail detail}) async {
     List<LivePlayQuality> qualities = [];
     var result = await HttpClient.instance.getJson(
@@ -237,13 +238,11 @@ class BiliBiliSite implements LiveSite {
   Future<LiveRoomDetail> getRoomDetail({required String roomId}) async {
     var roomInfo = await getRoomInfo(roomId: roomId);
     var realRoomId = roomInfo["room_info"]["room_id"].toString();
-
-    const danmuInfoBaseUrl =
-        "https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo";
-    var danmuInfoUrl = "$danmuInfoBaseUrl?id=$realRoomId";
-    var queryParams = await getWbiSign(danmuInfoUrl);
+    var url =
+        "https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo?id=$realRoomId";
+    var queryParams = await getWbiSign(url);
     var roomDanmakuResult = await HttpClient.instance.getJson(
-      danmuInfoBaseUrl,
+      "https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo",
       queryParameters: queryParams,
       header: await getHeader(),
     );
@@ -253,13 +252,10 @@ class BiliBiliSite implements LiveSite {
 
     //var buvid = await getBuvid();
     // 从 roomInfo 中提取 live_start_time
-    String? liveStartTime =
-        roomInfo["room_info"]?["live_start_time"]?.toString();
+    String? liveStartTime = roomInfo["room_info"]["live_start_time"].toString();
 
     // 计算开播时长并打印到控制台 (参考斗鱼的实现)
-    if (liveStartTime != null &&
-        liveStartTime.isNotEmpty &&
-        liveStartTime != "0") {
+    if (liveStartTime.isNotEmpty && liveStartTime != "0") {
       // 检查是否为0，0可能表示未开播或无此信息
       try {
         int startTimeStamp = int.parse(liveStartTime);
@@ -272,16 +268,13 @@ class BiliBiliSite implements LiveSite {
 
         String formattedDuration =
             '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-        print('Bilibili直播间 $roomId 开播时长: $formattedDuration');
-      } catch (e) {
-        print('计算 Bilibili 开播时长出错: $e');
-      }
+      } catch (e) {}
     }
-
     return LiveRoomDetail(
       roomId: realRoomId,
       title: roomInfo["room_info"]["title"].toString(),
       cover: roomInfo["room_info"]["cover"].toString(),
+      areaName: roomInfo["room_info"]["area_name"].toString(),
       userName: roomInfo["anchor_info"]["base_info"]["uname"].toString(),
       userAvatar: "${roomInfo["anchor_info"]["base_info"]["face"]}@100w.jpg",
       online: asT<int?>(roomInfo["room_info"]["online"]) ?? 0,
@@ -312,7 +305,6 @@ class BiliBiliSite implements LiveSite {
       queryParameters: queryParams,
       header: await getHeader(),
     );
-    print("【B站接口返回】roomId=$roomId, result=$result");
     return result["data"];
   }
 

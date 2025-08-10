@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:simple_live_tv_app/app/app_focus_node.dart';
 import 'package:simple_live_tv_app/app/controller/base_controller.dart';
@@ -23,38 +24,38 @@ class SettingsController extends BaseController
         hardwareDecodeFocusNode.requestFocus();
       }
       if (tabIndex.value == 1) {
-        danmakuFoucsNode.requestFocus();
+        danmakuFocusNode.requestFocus();
       }
       if (tabIndex.value == 2) {
         autoUpdateFollowEnableFocusNode.requestFocus();
       }
       if (tabIndex.value == 3) {
-        bilibiliFoucsNode.requestFocus();
+        bilibiliFocusNode.requestFocus();
       }
       if (tabIndex.value == 4) {
         versionFocusNode.requestFocus();
       }
     });
   }
-  var hardwareDecodeFocusNode = AppFocusNode()..isFoucsed.value = true;
+  var hardwareDecodeFocusNode = AppFocusNode()..isFocused.value = true;
   var compatibleModeFocusNode = AppFocusNode();
-  var scaleFoucsNode = AppFocusNode();
+  var scaleFocusNode = AppFocusNode();
   var defaultQualityFocusNode = AppFocusNode();
-  var danmakuFoucsNode = AppFocusNode();
-  var danmakuSizeFoucsNode = AppFocusNode();
-  var danmakuSpeedFoucsNode = AppFocusNode();
-  var danmakuAreaFoucsNode = AppFocusNode();
-  var danmakuOpacityFoucsNode = AppFocusNode();
-  var danmakuStorkeFoucsNode = AppFocusNode();
+  var danmakuFocusNode = AppFocusNode();
+  var danmakuSizeFocusNode = AppFocusNode();
+  var danmakuSpeedFocusNode = AppFocusNode();
+  var danmakuAreaFocusNode = AppFocusNode();
+  var danmakuOpacityFocusNode = AppFocusNode();
+  var danmakuStrokeFocusNode = AppFocusNode();
 
   var autoUpdateFollowEnableFocusNode = AppFocusNode();
   var autoUpdateFollowDurationFocusNode = AppFocusNode();
   var updateFollowThreadFocusNode = AppFocusNode();
 
-  var bilibiliFoucsNode = AppFocusNode();
+  var bilibiliFocusNode = AppFocusNode();
   var versionFocusNode = AppFocusNode();
   void bilibiliTap() async {
-    if (BiliBiliAccountService.instance.logined.value) {
+    if (BiliBiliAccountService.instance.logged.value) {
       var result = await Utils.showAlertDialog("确定要退出哔哩哔哩账号吗？", title: "退出登录");
       if (result) {
         BiliBiliAccountService.instance.logout();
@@ -64,4 +65,8 @@ class SettingsController extends BaseController
     }
   }
 
+  void checkUpdate() {
+    SmartDialog.showToast("检查更新中...");
+    Utils.checkUpdate(showMsg: true);
+  }
 }

@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-/// 拓展FoucsNode
+/// 拓展FocusNode
 class AppFocusNode extends FocusNode {
-  var isFoucsed = false.obs;
+  var isFocused = false.obs;
   AppFocusNode() {
-    isFoucsed.value = hasFocus;
-    addListener(updateFoucs);
+    isFocused.value = hasFocus;
+    addListener(updateFocus);
   }
 
-  updateFoucs() {
-    isFoucsed.value = hasFocus;
+  updateFocus() {
+    isFocused.value = hasFocus;
   }
 
   @override
   void dispose() {
-    removeListener(updateFoucs);
+    removeListener(updateFocus);
     super.dispose();
   }
 }

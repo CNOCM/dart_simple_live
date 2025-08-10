@@ -6,14 +6,14 @@ import 'package:simple_live_tv_app/app/app_style.dart';
 import 'package:simple_live_tv_app/widgets/highlight_widget.dart';
 
 class SettingsItemWidget extends StatelessWidget {
-  final AppFocusNode foucsNode;
+  final AppFocusNode focusNode;
   final Map<dynamic, String> items;
   final dynamic value;
   final String title;
   final bool autofocus;
   final Function(dynamic) onChanged;
   const SettingsItemWidget({
-    required this.foucsNode,
+    required this.focusNode,
     required this.items,
     required this.value,
     required this.title,
@@ -25,7 +25,7 @@ class SettingsItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return HighlightWidget(
-      focusNode: foucsNode,
+      focusNode: focusNode,
       autofocus: autofocus,
       borderRadius: AppStyle.radius16,
       onLeftKey: () {
@@ -34,7 +34,8 @@ class SettingsItemWidget extends StatelessWidget {
           onChanged(items.keys.last);
         } else {
           onChanged(
-              items.keys.elementAt(items.keys.toList().indexOf(value) - 1));
+            items.keys.elementAt(items.keys.toList().indexOf(value) - 1),
+          );
         }
         return KeyEventResult.handled;
       },
@@ -44,7 +45,8 @@ class SettingsItemWidget extends StatelessWidget {
           onChanged(items.keys.first);
         } else {
           onChanged(
-              items.keys.elementAt(items.keys.toList().indexOf(value) + 1));
+            items.keys.elementAt(items.keys.toList().indexOf(value) + 1),
+          );
         }
         return KeyEventResult.handled;
       },
@@ -58,38 +60,38 @@ class SettingsItemWidget extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: foucsNode.isFoucsed.value
+                style: focusNode.isFocused.value
                     ? AppStyle.textStyleBlack
                     : AppStyle.textStyleWhite,
               ),
               const Spacer(),
-              if (foucsNode.isFoucsed.value && items.isNotEmpty)
+              if (focusNode.isFocused.value && items.isNotEmpty)
                 Icon(
                   Icons.chevron_left,
                   size: 40.w,
                   color:
-                      foucsNode.isFoucsed.value ? Colors.black : Colors.white,
+                      focusNode.isFocused.value ? Colors.black : Colors.white,
                 ),
               AppStyle.hGap12,
               ConstrainedBox(
                 constraints: BoxConstraints(minWidth: 120.w),
                 child: Text(
                   items[value] ?? '',
-                  style: foucsNode.isFoucsed.value
+                  style: focusNode.isFocused.value
                       ? AppStyle.textStyleBlack
                       : AppStyle.textStyleWhite,
-                  textAlign: foucsNode.isFoucsed.value
+                  textAlign: focusNode.isFocused.value
                       ? TextAlign.center
                       : TextAlign.right,
                 ),
               ),
               AppStyle.hGap12,
-              if (foucsNode.isFoucsed.value && items.isNotEmpty)
+              if (focusNode.isFocused.value && items.isNotEmpty)
                 Icon(
                   Icons.chevron_right,
                   size: 40.w,
                   color:
-                      foucsNode.isFoucsed.value ? Colors.black : Colors.white,
+                      focusNode.isFocused.value ? Colors.black : Colors.white,
                 ),
             ],
           ),
@@ -112,9 +114,7 @@ class SettingsItemWidget extends StatelessWidget {
               title: Text(items[e] ?? '', style: AppStyle.textStyleWhite),
               contentPadding: AppStyle.edgeInsetsH20,
               autofocus: e == value,
-              shape: RoundedRectangleBorder(
-                borderRadius: AppStyle.radius16,
-              ),
+              shape: RoundedRectangleBorder(borderRadius: AppStyle.radius16),
               focusColor: Colors.white54,
               onTap: () {
                 onChanged(e);

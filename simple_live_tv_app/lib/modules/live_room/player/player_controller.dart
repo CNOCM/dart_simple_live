@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -8,7 +9,6 @@ import 'package:simple_live_tv_app/app/controller/base_controller.dart';
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
-import 'package:ns_danmaku/ns_danmaku.dart';
 import 'package:simple_live_tv_app/app/controller/app_settings_controller.dart';
 import 'package:simple_live_tv_app/app/log.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -81,7 +81,7 @@ mixin PlayerStateMixin on PlayerMixin {
 
   Widget? danmakuView;
 
-  var showQualites = false.obs;
+  var showQualities = false.obs;
   var showLines = false.obs;
 
   /// 隐藏控制器
@@ -154,9 +154,10 @@ mixin PlayerDanmakuMixin on PlayerStateMixin {
       DanmakuOption(
         fontSize: AppSettingsController.instance.danmuSize.value.w,
         area: AppSettingsController.instance.danmuArea.value,
-        duration: AppSettingsController.instance.danmuSpeed.value,
+        duration: AppSettingsController.instance.danmuSpeed.value.toInt(),
         opacity: AppSettingsController.instance.danmuOpacity.value,
-        strokeWidth: AppSettingsController.instance.danmuStrokeWidth.value.w,
+        showStroke: AppSettingsController.instance.danmuStrokeWidth.value > 0,
+        fontWeight: AppSettingsController.instance.danmuFontWeight.value,
       ),
     );
   }
@@ -170,11 +171,13 @@ mixin PlayerDanmakuMixin on PlayerStateMixin {
     danmakuController?.clear();
   }
 
-  void addDanmaku(List<DanmakuItem> items) {
+  void addDanmaku(List<DanmakuContentItem> items) {
     if (!showDanmakuState.value) {
       return;
     }
-    danmakuController?.addItems(items);
+    for (var item in items) {
+      danmakuController?.addDanmaku(item);
+    }
   }
 }
 mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {

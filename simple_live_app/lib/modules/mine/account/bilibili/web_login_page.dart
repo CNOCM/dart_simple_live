@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:simple_live_app/modules/mine/account/bilibili/web_login_controller.dart';
 
 class BiliBiliWebLoginPage extends GetView<BiliBiliWebLoginController> {
-  const BiliBiliWebLoginPage({Key? key}) : super(key: key);
+  const BiliBiliWebLoginPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,12 +22,10 @@ class BiliBiliWebLoginPage extends GetView<BiliBiliWebLoginController> {
       body: InAppWebView(
         onWebViewCreated: controller.onWebViewCreated,
         onLoadStop: controller.onLoadStop,
-        initialOptions: InAppWebViewGroupOptions(
-          crossPlatform: InAppWebViewOptions(
-            userAgent:
-                "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1 Edg/118.0.0.0",
-            useShouldOverrideUrlLoading: true,
-          ),
+        initialSettings: InAppWebViewSettings(
+          userAgent:
+              "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1 Edg/118.0.0.0",
+          useShouldOverrideUrlLoading: true,
         ),
         shouldOverrideUrlLoading: (webController, navigationAction) async {
           var uri = navigationAction.request.url;
@@ -35,7 +33,7 @@ class BiliBiliWebLoginPage extends GetView<BiliBiliWebLoginController> {
             return NavigationActionPolicy.ALLOW;
           }
           if (uri.host == "m.bilibili.com" || uri.host == "www.bilibili.com") {
-            await controller.logined();
+            await controller.logged();
             return NavigationActionPolicy.CANCEL;
           }
           return NavigationActionPolicy.ALLOW;

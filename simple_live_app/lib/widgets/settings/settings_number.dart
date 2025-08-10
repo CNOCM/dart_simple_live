@@ -22,8 +22,7 @@ class SettingsNumber extends StatelessWidget {
       this.min = 0,
       this.unit = '',
       this.displayValue,
-      Key? key})
-      : super(key: key);
+      super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -97,11 +96,11 @@ class SettingsNumber extends StatelessWidget {
           ],
         ),
       ),
-      onTap: () => openSilder(context),
+      onTap: () => openSlider(context),
     );
   }
 
-  void openSilder(BuildContext context) {
+  void openSlider(BuildContext context) {
     var newValue = value.obs;
     showModalBottomSheet(
       context: context,

@@ -16,7 +16,7 @@ class HighlightWidget extends StatelessWidget {
   final FocusOnKeyDownCallback? onRightKey;
   final Function(bool)? onFocusChange;
   final Function()? onTap;
-  final Color foucsedColor;
+  final Color focusedColor;
   final Color color;
   final bool autofocus;
   final BorderRadius? borderRadius;
@@ -36,7 +36,7 @@ class HighlightWidget extends StatelessWidget {
     this.borderRadius,
     this.order = 0.0,
     this.color = Colors.transparent,
-    this.foucsedColor = Colors.white,
+    this.focusedColor = Colors.white,
     Key? key,
   }) : super(key: key);
 
@@ -75,18 +75,18 @@ class HighlightWidget extends StatelessWidget {
           onTap: onTap,
           child: Obx(
             () => AnimatedScale(
-              scale: focusNode.isFoucsed.value ? 1.1 : 1,
+              scale: focusNode.isFocused.value ? 1.1 : 1,
               duration: const Duration(milliseconds: 200),
               child: GestureDetector(
                 onTap: onTap,
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: borderRadius,
-                    boxShadow: focusNode.isFoucsed.value
+                    boxShadow: focusNode.isFocused.value
                         ? AppStyle.highlightShadow
                         : null,
-                    color: (focusNode.isFoucsed.value || selected)
-                        ? foucsedColor
+                    color: (focusNode.isFocused.value || selected)
+                        ? focusedColor
                         : color,
                   ),
                   child: child,

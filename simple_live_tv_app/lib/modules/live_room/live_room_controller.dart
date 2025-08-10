@@ -1,10 +1,10 @@
 import 'dart:async';
 
+import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
-import 'package:ns_danmaku/models/danmaku_item.dart';
 import 'package:simple_live_core/simple_live_core.dart';
 import 'package:simple_live_tv_app/app/constant.dart';
 import 'package:simple_live_tv_app/app/controller/app_settings_controller.dart';
@@ -22,10 +22,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   final Site pSite;
   final String pRoomId;
   late LiveDanmaku liveDanmaku;
-  LiveRoomController({
-    required this.pSite,
-    required this.pRoomId,
-  }) {
+  LiveRoomController({required this.pSite, required this.pRoomId}) {
     rxSite = pSite.obs;
     rxRoomId = pRoomId.obs;
     liveDanmaku = site.liveSite.getDanmaku();
@@ -42,7 +39,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   var liveStatus = false.obs;
 
   /// 清晰度数据
-  RxList<LivePlayQuality> qualites = RxList<LivePlayQuality>();
+  RxList<LivePlayQuality> qualities = RxList<LivePlayQuality>();
 
   /// 当前清晰度
   var currentQuality = -1;
@@ -96,7 +93,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   }
 
   /// 初始化弹幕接收事件
-  void initDanmau() {
+  void initDanmaku() {
     liveDanmaku.onMessage = onWSMessage;
   }
 
@@ -128,14 +125,9 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
       }
 
       addDanmaku([
-        DanmakuItem(
+        DanmakuContentItem(
           msg.message,
-          color: Color.fromARGB(
-            255,
-            msg.color.r,
-            msg.color.g,
-            msg.color.b,
-          ),
+          color: Color.fromARGB(255, msg.color.r, msg.color.g, msg.color.b),
         ),
       ]);
     } else if (msg.type == LiveMessageType.online) {
@@ -149,52 +141,53 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   void loadData() async {
     try {
       SmartDialog.showLoading(msg: "");
-      pageLoadding.value = true;
+      pageLoading.value = true;
       detail.value = await site.liveSite.getRoomDetail(roomId: roomId);
 
       addHistory();
       online.value = detail.value!.online;
       liveStatus.value = detail.value!.status || detail.value!.isRecord;
       if (liveStatus.value) {
-        getPlayQualites();
+        getPlayQualities();
       }
       if (detail.value!.isRecord) {
         SmartDialog.showToast("当前主播未开播，正在轮播录像");
       }
 
-      initDanmau();
+      initDanmaku();
       liveDanmaku.start(detail.value?.danmakuData);
     } catch (e) {
       SmartDialog.showToast(e.toString());
     } finally {
       SmartDialog.dismiss(status: SmartStatus.loading);
-      pageLoadding.value = false;
+      pageLoading.value = false;
     }
   }
 
   /// 初始化播放器
-  void getPlayQualites() async {
-    qualites.clear();
+  void getPlayQualities() async {
+    qualities.clear();
     currentQuality = -1;
     try {
-      var playQualites =
-          await site.liveSite.getPlayQualites(detail: detail.value!);
+      var playQualities = await site.liveSite.getPlayQualities(
+        detail: detail.value!,
+      );
 
-      if (playQualites.isEmpty) {
+      if (playQualities.isEmpty) {
         SmartDialog.showToast("无法读取播放清晰度");
         return;
       }
-      qualites.value = playQualites;
+      qualities.value = playQualities;
       var qualityLevel = AppSettingsController.instance.qualityLevel.value;
       if (qualityLevel == 2) {
         //最高
         currentQuality = 0;
       } else if (qualityLevel == 0) {
         //最低
-        currentQuality = playQualites.length - 1;
+        currentQuality = playQualities.length - 1;
       } else {
         //中间值
-        int middle = (playQualites.length / 2).floor();
+        int middle = (playQualities.length / 2).floor();
         currentQuality = middle;
       }
 
@@ -207,11 +200,13 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
 
   void getPlayUrl() async {
     playUrls.clear();
-    currentQualityInfo.value = qualites[currentQuality].quality;
+    currentQualityInfo.value = qualities[currentQuality].quality;
     currentLineInfo.value = "";
     currentLineIndex = -1;
-    var playUrl = await site.liveSite
-        .getPlayUrls(detail: detail.value!, quality: qualites[currentQuality]);
+    var playUrl = await site.liveSite.getPlayUrls(
+      detail: detail.value!,
+      quality: qualities[currentQuality],
+    );
     if (playUrl.urls.isEmpty) {
       SmartDialog.showToast("无法读取播放地址");
       return;
@@ -236,12 +231,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     currentLineInfo.value = "线路${currentLineIndex + 1}";
     errorMsg.value = "";
 
-    player.open(
-      Media(
-        playUrls[currentLineIndex],
-        httpHeaders: playHeaders,
-      ),
-    );
+    player.open(Media(playUrls[currentLineIndex], httpHeaders: playHeaders));
 
     Log.d("播放链接\r\n：${playUrls[currentLineIndex]}");
   }
@@ -385,8 +375,9 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
       SmartDialog.showToast("没有正在直播的频道");
       return;
     }
-    var index = liveChannels
-        .indexWhere((element) => element.id == "${site.id}_$roomId");
+    var index = liveChannels.indexWhere(
+      (element) => element.id == "${site.id}_$roomId",
+    );
     // if (index == -1) {
     //   //当前频道不在列表中
 
@@ -408,8 +399,9 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
       SmartDialog.showToast("没有正在直播的频道");
       return;
     }
-    var index = liveChannels
-        .indexWhere((element) => element.id == "${site.id}_$roomId");
+    var index = liveChannels.indexWhere(
+      (element) => element.id == "${site.id}_$roomId",
+    );
     // if (index == -1) {
     //   //当前频道不在列表中
 

@@ -23,7 +23,7 @@ class NoneBorderCircularTextField extends StatelessWidget {
   final bool needPadding;
 
   const NoneBorderCircularTextField({
-    Key? key,
+    super.key,
     required this.editingController,
     this.hintText,
     this.helperText,
@@ -43,7 +43,7 @@ class NoneBorderCircularTextField extends StatelessWidget {
     this.enable,
     this.readOnly = false,
     this.needPadding = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -58,9 +58,9 @@ class NoneBorderCircularTextField extends StatelessWidget {
         suffix: trailing,
         helperText: helperText,
         helperMaxLines: 3,
-        border: const OutlineInputBorder(
+        border: OutlineInputBorder(
           borderSide: BorderSide.none,
-          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+          borderRadius: const BorderRadius.all(Radius.circular(8.0)),
         ),
         labelText: labelText,
         errorText: errorText,

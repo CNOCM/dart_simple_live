@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
@@ -18,39 +20,29 @@ class DBService extends GetxService {
     tagBox = await Hive.openBox("FollowUserTag");
   }
 
-  // follow_user_tag 相关逻辑
-  bool getFollowTagExist(String id){
+  bool getFollowTagExist(String id) {
     return tagBox.containsKey(id);
   }
 
-  // 删除标签
-  Future deleteFollowTag(String id) async {
-    await tagBox.delete(id);
-  }
-
-  FollowUserTag? getFollowTag(String tag){
-    return tagBox.get(tag);
-  }
-
-  // 判断标签名称是否重复
-  bool getFollowTagExistByTag(String tag){
-    return tagBox.values.any((item) => item.tag == tag);
-  }
-
-  // 获取标签列表
   List<FollowUserTag> getFollowTagList() {
     return tagBox.values.toList();
   }
 
-  // 修改标签
   Future updateFollowTag(FollowUserTag followTag) async {
     await tagBox.put(followTag.id, followTag);
   }
 
-  // 添加标签
-  Future<FollowUserTag> addFollowTag(String tag) async{
-    // 限制标签唯一且长度不超过8个字符
-    if(getFollowTagExistByTag(tag) && tag.length > 8){
+  Future updateFollowTagOrder(List<FollowUserTag> userTagList) async {
+    final Map<int, FollowUserTag> updatedMap = {
+      for (int i = 0; i < userTagList.length; i++) i: userTagList[i]
+    };
+    await tagBox.clear();
+    await tagBox.putAll(updatedMap);
+  }
+
+  Future<FollowUserTag> addFollowTag(String tag) async {
+    // 查找数据库中是否已存在 存在则直接返回
+    if (getFollowTagExistByTag(tag)) {
       return getFollowTag(tag)!;
     }
     final String uniqueId = uuid.v4();
@@ -59,13 +51,17 @@ class DBService extends GetxService {
     return followUserTag;
   }
 
-  // 调整标签顺序
-  Future updateFollowTagOrder(List<FollowUserTag> userTagList) async {
-    final Map<int, FollowUserTag> updatedMap = {
-      for (int i = 0; i < userTagList.length; i++) i: userTagList[i]
-    };
-    await tagBox.clear();
-    await tagBox.putAll(updatedMap);
+  Future deleteFollowTag(String id) async {
+    await tagBox.delete(id);
+  }
+
+  FollowUserTag? getFollowTag(String tag) {
+    return tagBox.get(tag);
+  }
+
+  // 判断tag名称是否重复
+  bool getFollowTagExistByTag(String tag) {
+    return tagBox.values.any((item) => item.tag == tag);
   }
 
   bool getFollowExist(String id) {
@@ -95,7 +91,7 @@ class DBService extends GetxService {
     await historyBox.put(history.id, history);
   }
 
-  List<History> getHistores() {
+  List<History> getHistories() {
     var his = historyBox.values.toList();
     his.sort((a, b) => b.updateTime.compareTo(a.updateTime));
     return his;

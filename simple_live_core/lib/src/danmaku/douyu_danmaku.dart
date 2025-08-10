@@ -19,11 +19,11 @@ class DouyuDanmaku implements LiveDanmaku {
   Function()? onReady;
   String serverUrl = "wss://danmuproxy.douyu.com:8506";
 
-  WebScoketUtils? webScoketUtils;
+  WebSocketUtils? webSocketUtils;
 
   @override
   Future start(dynamic args) async {
-    webScoketUtils = WebScoketUtils(
+    webSocketUtils = WebSocketUtils(
       url: serverUrl,
       heartBeatTime: heartbeatTime,
       onMessage: (e) {
@@ -43,27 +43,27 @@ class DouyuDanmaku implements LiveDanmaku {
         onClose?.call("服务器连接失败$e");
       },
     );
-    webScoketUtils?.connect();
+    webSocketUtils?.connect();
   }
 
   void joinRoom(roomId) {
-    webScoketUtils
+    webSocketUtils
         ?.sendMessage(serializeDouyu("type@=loginreq/roomid@=$roomId/"));
-    webScoketUtils?.sendMessage(
+    webSocketUtils?.sendMessage(
         serializeDouyu("type@=joingroup/rid@=$roomId/gid@=-9999/"));
   }
 
   @override
   void heartbeat() {
     var data = serializeDouyu("type@=mrkl/");
-    webScoketUtils?.sendMessage(data);
+    webSocketUtils?.sendMessage(data);
   }
 
   @override
   Future stop() async {
     onMessage = null;
     onClose = null;
-    webScoketUtils?.close();
+    webSocketUtils?.close();
   }
 
   void decodeMessage(List<int> data) {
@@ -75,12 +75,11 @@ class DouyuDanmaku implements LiveDanmaku {
       var jsonData = sttToJObject(result);
 
       var type = jsonData["type"]?.toString();
+      var fans = jsonData["if"] ?? '0'.toString();
       //斗鱼好像不会返回人气值
-      if (type == "chatmsg") {
-        // 屏蔽阴间弹幕
-        if (jsonData["dms"] == null) {
-          return;
-        }
+      //有些直播间存在阴间弹幕，不知道什么情况
+      //只显示粉丝发言
+      if (type == "chatmsg" && fans == '1') {
         var col = int.tryParse(jsonData["col"].toString()) ?? 0;
         var liveMsg = LiveMessage(
           type: LiveMessageType.chat,

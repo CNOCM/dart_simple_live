@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_single_instance/flutter_single_instance.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -14,6 +16,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:simple_live_app/app/app_style.dart';
 import 'package:simple_live_app/app/controller/app_settings_controller.dart';
+import 'package:simple_live_app/app/event_bus.dart';
 import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/app/utils.dart';
 import 'package:simple_live_app/app/utils/listen_fourth_button.dart';
@@ -26,18 +29,17 @@ import 'package:simple_live_app/routes/route_path.dart';
 import 'package:simple_live_app/services/bilibili_account_service.dart';
 import 'package:simple_live_app/services/db_service.dart';
 import 'package:simple_live_app/services/follow_service.dart';
+import 'package:simple_live_app/services/history_service.dart';
 import 'package:simple_live_app/services/local_storage_service.dart';
+import 'package:simple_live_app/services/migration_service.dart';
 import 'package:simple_live_app/services/sync_service.dart';
-import 'package:simple_live_app/widgets/status/app_loadding_widget.dart';
+import 'package:simple_live_app/widgets/status/app_loading_widget.dart';
 import 'package:simple_live_core/simple_live_core.dart';
 import 'package:window_manager/window_manager.dart';
 
-import 'package:path/path.dart' as p;
-import 'package:dynamic_color/dynamic_color.dart';
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await migrateData();
+  await MigrationService.migrateData();
   await initWindow();
   MediaKit.ensureInitialized();
   await Hive.initFlutter(
@@ -47,6 +49,8 @@ void main() async {
   );
   //初始化服务
   await initServices();
+
+  MigrationService.migrateDataByVersion();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   //设置状态栏为透明
   SystemUiOverlayStyle systemUiOverlayStyle = const SystemUiOverlayStyle(
@@ -58,52 +62,20 @@ void main() async {
   runApp(const MyApp());
 }
 
-/// 将Hive数据迁移到Application Support
-Future migrateData() async {
-  if (Platform.isAndroid || Platform.isIOS) {
-    return;
-  }
-  var hiveFileList = [
-    "followuser",
-    //旧版本写错成hostiry了
-    "hostiry",
-    "followusertag",
-    "localstorage",
-    "danmushield",
-  ];
-  try {
-    var newDir = await getApplicationSupportDirectory();
-    var hiveFile = File(p.join(newDir.path, "followuser.hive"));
-    if (await hiveFile.exists()) {
-      return;
-    }
-
-    var oldDir = await getApplicationDocumentsDirectory();
-    for (var element in hiveFileList) {
-      var oldFile = File(p.join(oldDir.path, "$element.hive"));
-      if (await oldFile.exists()) {
-        var fileName = "$element.hive";
-        if (element == "hostiry") {
-          fileName = "history.hive";
-        }
-        await oldFile.copy(p.join(newDir.path, fileName));
-        await oldFile.delete();
-      }
-      var lockFile = File(p.join(oldDir.path, "$element.lock"));
-      if (await lockFile.exists()) {
-        await lockFile.delete();
-      }
-    }
-  } catch (e) {
-    Log.logPrint(e);
-  }
-}
-
 Future initWindow() async {
   if (!(Platform.isMacOS || Platform.isWindows || Platform.isLinux)) {
     return;
   }
   await windowManager.ensureInitialized();
+  // 判定程序是否启动
+  if (!await FlutterSingleInstance().isFirstInstance()) {
+    Log.i("App is already running");
+    final err = await FlutterSingleInstance().focus();
+    if (err != null) {
+      Log.e("Error focusing running instance: $err", StackTrace.current);
+    }
+    exit(0);
+  }
   WindowOptions windowOptions = const WindowOptions(
     minimumSize: Size(280, 280),
     center: true,
@@ -134,6 +106,8 @@ Future initServices() async {
   Get.put(SyncService());
 
   Get.put(FollowService());
+
+  Get.put(HistoryService());
 
   initCoreLog();
 }
@@ -208,7 +182,7 @@ class MyApp extends StatelessWidget {
         //debugShowCheckedModeBanner: false,
         navigatorObservers: [FlutterSmartDialog.observer],
         builder: FlutterSmartDialog.init(
-          loadingBuilder: ((msg) => const AppLoaddingWidget()),
+          loadingBuilder: ((msg) => const AppLoadingWidget()),
           //字体大小不跟随系统变化
           builder: (context, child) => MediaQuery(
             data: MediaQuery.of(context)
@@ -247,6 +221,7 @@ class MyApp extends StatelessWidget {
                         if (!Platform.isAndroid && !Platform.isIOS) {
                           if (await windowManager.isFullScreen()) {
                             await windowManager.setFullScreen(false);
+                            EventBus.instance.emit(EventBus.kEscapePressed, 0);
                             return;
                           }
                         }

@@ -145,10 +145,10 @@ class SyncService extends GetxService {
       var serverRouter = Router();
       serverRouter.get('/', _helloRequest);
       serverRouter.get('/info', _infoRequest);
-      serverRouter.post('/sync/follow', _syncFollowUserReuqest);
-      serverRouter.post('/sync/history', _syncHistoryReuqest);
-      serverRouter.post('/sync/blocked_word', _syncBlockedWordReuqest);
-      serverRouter.post('/sync/account/bilibili', _syncBiliAccountReuqest);
+      serverRouter.post('/sync/follow', _syncFollowUserRequest);
+      serverRouter.post('/sync/history', _syncHistoryRequest);
+      serverRouter.post('/sync/blocked_word', _syncBlockedWordRequest);
+      serverRouter.post('/sync/account/bilibili', _syncBiliAccountRequest);
 
       var server = await shelf_io.serve(
         serverRouter,
@@ -177,7 +177,7 @@ class SyncService extends GetxService {
       'status': true,
       'message': 'http server is running...',
       "version":
-          'SimpeLive ${Platform.operatingSystem} v${Utils.packageInfo.version}',
+          'SimpleLive ${Platform.operatingSystem} v${Utils.packageInfo.version}',
     });
   }
 
@@ -195,13 +195,13 @@ class SyncService extends GetxService {
   }
 
   /// 同步关注用户列表
-  Future<shelf.Response> _syncFollowUserReuqest(shelf.Request request) async {
+  Future<shelf.Response> _syncFollowUserRequest(shelf.Request request) async {
     try {
       var overlay =
           int.parse(request.requestedUri.queryParameters['overlay'] ?? '0');
 
       var body = await request.readAsString();
-      Log.d('_syncFollowUserReuqest: $body');
+      Log.d('_syncFollowUserRequest: $body');
       var jsonBody = json.decode(body);
       if (overlay == 1) {
         await DBService.instance.followBox.clear();
@@ -226,12 +226,12 @@ class SyncService extends GetxService {
   }
 
   /// 同步观看记录
-  Future<shelf.Response> _syncHistoryReuqest(shelf.Request request) async {
+  Future<shelf.Response> _syncHistoryRequest(shelf.Request request) async {
     try {
       var overlay =
           int.parse(request.requestedUri.queryParameters['overlay'] ?? '0');
       var body = await request.readAsString();
-      Log.d('_syncFollowUserReuqest: $body');
+      Log.d('_syncFollowUserRequest: $body');
       var jsonBody = json.decode(body);
       if (overlay == 1) {
         await DBService.instance.historyBox.clear();
@@ -263,12 +263,12 @@ class SyncService extends GetxService {
   }
 
   /// 同步弹幕屏蔽词
-  Future<shelf.Response> _syncBlockedWordReuqest(shelf.Request request) async {
+  Future<shelf.Response> _syncBlockedWordRequest(shelf.Request request) async {
     try {
       var overlay =
           int.parse(request.requestedUri.queryParameters['overlay'] ?? '0');
       var body = await request.readAsString();
-      Log.d('_syncBlockedWordReuqest: $body');
+      Log.d('_syncBlockedWordRequest: $body');
       var jsonBody = json.decode(body);
       if (overlay == 1) {
         AppSettingsController.instance.clearShieldList();
@@ -290,10 +290,10 @@ class SyncService extends GetxService {
   }
 
   /// 同步哔哩哔哩账号
-  Future<shelf.Response> _syncBiliAccountReuqest(shelf.Request request) async {
+  Future<shelf.Response> _syncBiliAccountRequest(shelf.Request request) async {
     try {
       var body = await request.readAsString();
-      Log.d('_syncBiliAccountReuqest: $body');
+      Log.d('_syncBiliAccountRequest: $body');
       var jsonBody = json.decode(body);
       var cookie = jsonBody['cookie'];
       BiliBiliAccountService.instance.setCookie(cookie);

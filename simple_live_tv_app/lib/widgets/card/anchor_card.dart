@@ -67,7 +67,7 @@ class AnchorCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 36.w,
                             overflow: TextOverflow.ellipsis,
-                            color: focusNode.isFoucsed.value
+                            color: focusNode.isFocused.value
                                 ? Colors.black
                                 : Colors.white,
                           ),
@@ -76,19 +76,14 @@ class AnchorCard extends StatelessWidget {
                           TextSpan(
                             children: [
                               WidgetSpan(
-                                child: Image.asset(
-                                  site.logo,
-                                  width: 32.w,
-                                ),
+                                child: Image.asset(site.logo, width: 32.w),
                               ),
-                              TextSpan(
-                                text: " ${site.name}",
-                              ),
+                              TextSpan(text: " ${site.name}"),
                             ],
                           ),
                           style: TextStyle(
                             fontSize: 24.w,
-                            color: focusNode.isFoucsed.value
+                            color: focusNode.isFocused.value
                                 ? Colors.black
                                 : Colors.white,
                           ),
@@ -104,8 +99,10 @@ class AnchorCard extends StatelessWidget {
                 right: 0,
                 top: 0,
                 child: Container(
-                  padding:
-                      AppStyle.edgeInsetsH16.copyWith(top: 4.w, bottom: 4.w),
+                  padding: AppStyle.edgeInsetsH16.copyWith(
+                    top: 4.w,
+                    bottom: 4.w,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.green,
                     borderRadius: BorderRadius.only(
@@ -115,10 +112,7 @@ class AnchorCard extends StatelessWidget {
                   ),
                   child: Text(
                     "直播中",
-                    style: TextStyle(
-                      fontSize: 24.w,
-                      color: Colors.white,
-                    ),
+                    style: TextStyle(fontSize: 24.w, color: Colors.white),
                   ),
                 ),
               ),

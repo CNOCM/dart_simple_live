@@ -14,7 +14,7 @@ class BiliBiliAccountService extends GetxService {
   static BiliBiliAccountService get instance =>
       Get.find<BiliBiliAccountService>();
 
-  var logined = false.obs;
+  var logged = false.obs;
 
   var cookie = "";
   var uid = 0;
@@ -24,7 +24,7 @@ class BiliBiliAccountService extends GetxService {
   void onInit() {
     cookie = LocalStorageService.instance
         .getValue(LocalStorageService.kBilibiliCookie, "");
-    logined.value = cookie.isNotEmpty;
+    logged.value = cookie.isNotEmpty;
     loadUserInfo();
     super.onInit();
   }
@@ -64,7 +64,7 @@ class BiliBiliAccountService extends GetxService {
     this.cookie = cookie;
     LocalStorageService.instance
         .setValue(LocalStorageService.kBilibiliCookie, cookie);
-    logined.value = cookie.isNotEmpty;
+    logged.value = cookie.isNotEmpty;
   }
 
   void logout() async {
@@ -74,7 +74,7 @@ class BiliBiliAccountService extends GetxService {
     setSite();
     LocalStorageService.instance
         .setValue(LocalStorageService.kBilibiliCookie, "");
-    logined.value = false;
+    logged.value = false;
 
     if (Platform.isAndroid || Platform.isIOS) {
       CookieManager cookieManager = CookieManager.instance();

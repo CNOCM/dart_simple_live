@@ -7,6 +7,9 @@ class EventBus {
   /// 点击了底部导航
   static const String kBottomNavigationBarClicked =
       "BottomNavigationBarClicked";
+
+  /// 用户按了Esc
+  static const String kEscapePressed = "EscapePressed";
   static EventBus? _instance;
 
   static EventBus get instance {

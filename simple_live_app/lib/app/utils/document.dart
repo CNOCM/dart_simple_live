@@ -26,9 +26,10 @@ extension DirectoryCleaner on Directory {
       Log.i('$path 不是一个有效的文件夹');
     }
   }
+
   // 阻塞主线程
-  void clearSync()  {
-    if ( existsSync() && FileSystemEntity.isDirectorySync(path)) {
+  void clearSync() {
+    if (existsSync() && FileSystemEntity.isDirectorySync(path)) {
       List<FileSystemEntity> files = listSync();
       for (FileSystemEntity file in files) {
         if (file is File) {

@@ -41,6 +41,9 @@ class LocalStorageService extends GetxService {
   /// 弹幕描边大小
   static const String kDanmuStrokeWidth = "DanmuStrokeWidth";
 
+  /// 弹幕字重
+  static const String kDanmuFontWeight = "DanmuFontWeight";
+
   /// 弹幕-屏蔽滚动
   static const String kDanmuHideScroll = "DanmuHideScroll";
 

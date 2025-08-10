@@ -49,19 +49,18 @@ class LiveRoomCard extends StatelessWidget {
                 children: [
                   AspectRatio(
                     aspectRatio: 16 / 9,
-                    child: NetImage(
-                      cover,
-                      cacheWidth: 400,
-                    ),
+                    child: NetImage(cover, cacheWidth: 400),
                   ),
                   Positioned(
                     right: 8.w,
                     top: 8.w,
                     child: Container(
-                      padding:
-                          AppStyle.edgeInsetsH8.copyWith(top: 4.w, bottom: 4.w),
+                      padding: AppStyle.edgeInsetsH8.copyWith(
+                        top: 4.w,
+                        bottom: 4.w,
+                      ),
                       decoration: BoxDecoration(
-                        color: focusNode.isFoucsed.value
+                        color: focusNode.isFocused.value
                             ? Colors.white
                             : Colors.black54,
                         borderRadius: AppStyle.radius8,
@@ -76,21 +75,19 @@ class LiveRoomCard extends StatelessWidget {
                                 padding: AppStyle.edgeInsetsR8,
                                 child: Icon(
                                   Icons.whatshot,
-                                  color: focusNode.isFoucsed.value
+                                  color: focusNode.isFocused.value
                                       ? Colors.orange
                                       : Colors.white,
                                   size: 20.w,
                                 ),
                               ),
                             ),
-                            TextSpan(
-                              text: Utils.onlineToString(online),
-                            ),
+                            TextSpan(text: Utils.onlineToString(online)),
                           ],
                         ),
                         style: TextStyle(
                           fontSize: 20.w,
-                          color: focusNode.isFoucsed.value
+                          color: focusNode.isFocused.value
                               ? Colors.black
                               : Colors.white,
                         ),
@@ -108,7 +105,7 @@ class LiveRoomCard extends StatelessWidget {
               padding: AppStyle.edgeInsetsH20,
               child: SizedBox(
                 height: 56.w,
-                child: focusNode.isFoucsed.value
+                child: focusNode.isFocused.value
                     ? Marquee(
                         text: title,
                         style: AppStyle.textStyleBlack,
@@ -135,7 +132,7 @@ class LiveRoomCard extends StatelessWidget {
                 AppStyle.hGap20,
                 Icon(
                   Icons.account_circle,
-                  color: focusNode.isFoucsed.value
+                  color: focusNode.isFocused.value
                       ? Colors.black54
                       : Colors.white54,
                   size: 32.w,
@@ -144,7 +141,7 @@ class LiveRoomCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     anchor,
-                    style: focusNode.isFoucsed.value
+                    style: focusNode.isFocused.value
                         ? AppStyle.subTextStyleBlack
                         : AppStyle.subTextStyleWhite,
                     maxLines: 1,

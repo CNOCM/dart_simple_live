@@ -5,6 +5,14 @@ import 'package:simple_live_core/simple_live_core.dart';
 import 'package:simple_live_core/src/common/convert_helper.dart';
 import 'package:simple_live_core/src/common/http_client.dart';
 
+mixin DouyinRequestParams {
+  static const String kDefaultUserAgent =
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0";
+  static const aidValue = "6383";
+  static const versionCodeValue = "180800";
+  static const sdkVersion = "1.0.14-beta.0";
+}
+
 class DouyinSite implements LiveSite {
   @override
   String id = "douyin";
@@ -15,9 +23,6 @@ class DouyinSite implements LiveSite {
   @override
   LiveDanmaku getDanmaku() => DouyinDanmaku();
 
-  static const String kDefaultUserAgent =
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0";
-
   static const String kDefaultReferer = "https://live.douyin.com";
 
   static const String kDefaultAuthority = "live.douyin.com";
@@ -25,7 +30,7 @@ class DouyinSite implements LiveSite {
   Map<String, dynamic> headers = {
     "Authority": kDefaultAuthority,
     "Referer": kDefaultReferer,
-    "User-Agent": kDefaultUserAgent,
+    "User-Agent": DouyinRequestParams.kDefaultUserAgent,
   };
 
   Future<Map<String, dynamic>> getRequestHeaders() async {
@@ -49,7 +54,7 @@ class DouyinSite implements LiveSite {
   }
 
   @override
-  Future<List<LiveCategory>> getCategores() async {
+  Future<List<LiveCategory>> getCategories() async {
     List<LiveCategory> categories = [];
     var result = await HttpClient.instance.getText(
       "https://live.douyin.com/",
@@ -223,6 +228,7 @@ class DouyinSite implements LiveSite {
       roomId: webRid,
       title: room["title"].toString(),
       cover: roomStatus ? room["cover"]["url_list"][0].toString() : "",
+      areaName: "",
       userName: owner["nickname"].toString(),
       userAvatar: owner["avatar_thumb"]["url_list"][0].toString(),
       online: roomStatus
@@ -265,6 +271,16 @@ class DouyinSite implements LiveSite {
     var userData = data["user"];
     var roomId = roomData["id_str"].toString();
 
+    var partitionTitle =
+        data["partition_road_map"]?["partition"]?["title"]?.toString();
+    var subPartitionTitle = data["partition_road_map"]?["sub_partition"]
+            ?["partition"]?["title"]
+        ?.toString();
+
+    var areaName = (subPartitionTitle != null && subPartitionTitle.isNotEmpty)
+        ? subPartitionTitle
+        : (partitionTitle ?? "");
+
     // 读取用户唯一ID，用于弹幕连接
     // 似乎这个参数不是必须的，先随机生成一个
     //var userUniqueId = await _getUserUniqueId(webRid);
@@ -280,6 +296,7 @@ class DouyinSite implements LiveSite {
       roomId: webRid,
       title: roomData["title"].toString(),
       cover: roomStatus ? roomData["cover"]["url_list"][0].toString() : "",
+      areaName: areaName,
       userName: roomStatus
           ? owner["nickname"].toString()
           : userData["nickname"].toString(),
@@ -324,6 +341,7 @@ class DouyinSite implements LiveSite {
       roomId: webRid,
       title: room["title"].toString(),
       cover: roomStatus ? room["cover"]["url_list"][0].toString() : "",
+      areaName: "",
       userName: roomStatus
           ? owner["nickname"].toString()
           : anchor["nickname"].toString(),
@@ -393,7 +411,7 @@ class DouyinSite implements LiveSite {
         "Authority": kDefaultAuthority,
         "Referer": kDefaultReferer,
         "Cookie": dyCookie,
-        "User-Agent": kDefaultUserAgent,
+        "User-Agent": DouyinRequestParams.kDefaultUserAgent,
       },
     );
 
@@ -439,7 +457,6 @@ class DouyinSite implements LiveSite {
       },
       header: requestHeader,
     );
-
     return result["data"];
   }
 
@@ -462,11 +479,11 @@ class DouyinSite implements LiveSite {
   }
 
   @override
-  Future<List<LivePlayQuality>> getPlayQualites(
+  Future<List<LivePlayQuality>> getPlayQualities(
       {required LiveRoomDetail detail}) async {
     List<LivePlayQuality> qualities = [];
 
-    var qulityList =
+    var qualityList =
         detail.data["live_core_sdk_data"]["pull_data"]["options"]["qualities"];
     var streamData = detail.data["live_core_sdk_data"]["pull_data"]
             ["stream_data"]
@@ -479,7 +496,7 @@ class DouyinSite implements LiveSite {
           .values
           .cast<String>()
           .toList();
-      for (var quality in qulityList) {
+      for (var quality in qualityList) {
         int level = quality["level"];
         List<String> urls = [];
         var flvIndex = flvList.length - level;
@@ -501,7 +518,7 @@ class DouyinSite implements LiveSite {
       }
     } else {
       var qualityData = json.decode(streamData)["data"] as Map;
-      for (var quality in qulityList) {
+      for (var quality in qualityList) {
         List<String> urls = [];
         var flvUrl =
             qualityData[quality["sdk_key"]]?["main"]?["flv"]?.toString();
@@ -578,8 +595,8 @@ class DouyinSite implements LiveSite {
       "round_trip_time": "100",
       "webid": "7382872326016435738",
     });
-    //var requlestUrl = await getAbogusUrl(uri.toString());
-    var requlestUrl = uri.toString();
+    //var requestUrl = await getAbogusUrl(uri.toString());
+    var requestUrl = uri.toString();
     var headResp = await HttpClient.instance
         .head('https://live.douyin.com', header: headers);
     var dyCookie = "";
@@ -594,7 +611,7 @@ class DouyinSite implements LiveSite {
     });
 
     var result = await HttpClient.instance.getJson(
-      requlestUrl,
+      requestUrl,
       queryParameters: {},
       header: {
         "Authority": 'www.douyin.com',
@@ -611,7 +628,7 @@ class DouyinSite implements LiveSite {
         'sec-fetch-dest': 'empty',
         'sec-fetch-mode': 'cors',
         'sec-fetch-site': 'same-origin',
-        'user-agent': kDefaultUserAgent,
+        'user-agent': DouyinRequestParams.kDefaultUserAgent,
       },
     );
     if (result == "" || result == 'blocked') {
@@ -684,7 +701,7 @@ class DouyinSite implements LiveSite {
         "https://dy.nsapps.cn/abogus",
         queryParameters: {},
         header: {"Content-Type": "application/json"},
-        data: {"url": url, "userAgent": kDefaultUserAgent},
+        data: {"url": url, "userAgent": DouyinRequestParams.kDefaultUserAgent},
       );
       return signResult["data"]["url"];
     } catch (e) {

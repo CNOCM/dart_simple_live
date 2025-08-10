@@ -13,15 +13,20 @@ import 'package:simple_live_app/app/event_bus.dart';
 import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/app/sites.dart';
 import 'package:simple_live_app/app/utils.dart';
+import 'package:simple_live_app/app/utils/duration_2str.dart';
 import 'package:simple_live_app/models/db/follow_user.dart';
 import 'package:simple_live_app/models/db/follow_user_tag.dart';
+import 'package:simple_live_app/models/db/history.dart';
 import 'package:simple_live_app/services/db_service.dart';
+import 'package:synchronized/synchronized.dart';
 
 class FollowService extends GetxService {
   StreamSubscription<dynamic>? subscription;
+
   static FollowService get instance => Get.find<FollowService>();
 
   final StreamController _updatedListController = StreamController.broadcast();
+
   Stream get updatedListStream => _updatedListController.stream;
 
   /// 关注用户列表
@@ -39,6 +44,9 @@ class FollowService extends GetxService {
   /// 当前tag的用户列表
   RxList<FollowUser> curTagFollowList = RxList<FollowUser>();
 
+  /// 线程安全
+  final _lock = Lock();
+
   /// 已经更新状态的数量
   var updatedCount = 0;
 
@@ -49,14 +57,24 @@ class FollowService extends GetxService {
 
   @override
   void onInit() {
-    subscription = EventBus.instance.listen(Constant.kUpdateFollow, (p0) {
-      loadData(updateStatus: false);
+    subscription = EventBus.instance.listen(Constant.kUpdateFollow, (data) {
+      if (data is History) {
+        updateFollow(data);
+      } else {
+        loadData(updateStatus: false);
+      }
     });
     initTimer();
     super.onInit();
   }
 
-  // 添加标签
+  void updateFollowUserTag(FollowUserTag tag) {
+    DBService.instance.updateFollowTag(tag);
+    // 查找并修改
+    var index = followTagList.indexWhere((oTag) => oTag.id == tag.id);
+    followTagList[index] = tag;
+  }
+
   Future<void> addFollowUserTag(String tag) async {
     // 判断待添加tag是否已存在，存在则return
     if (followTagList.any((item) => item.tag == tag)) {
@@ -67,10 +85,9 @@ class FollowService extends GetxService {
     followTagList.add(item);
   }
 
-  // 删除标签
-  void delFollowUserTag(FollowUserTag tag) {
+  Future delFollowUserTag(FollowUserTag tag) async {
     followTagList.remove(tag);
-    DBService.instance.deleteFollowTag(tag.id);
+    await DBService.instance.deleteFollowTag(tag.id);
   }
 
   // 获取用户自定义标签列表
@@ -79,16 +96,8 @@ class FollowService extends GetxService {
     followTagList.assignAll(list);
   }
 
-  // 修改标签
-  void updateFollowUserTag(FollowUserTag tag) {
-    DBService.instance.updateFollowTag(tag);
-    // 查找并修改
-    var index = followTagList.indexWhere((oTag) => oTag.id == tag.id);
-    followTagList[index] = tag;
-  }
-
-  // 根据标签筛选数据
   void filterDataByTag(FollowUserTag tag) {
+    // 清空curTagFollowList
     curTagFollowList.clear();
     // 用一个新的列表来存储需要删除的 userId
     List<String> toRemove = [];
@@ -101,7 +110,6 @@ class FollowService extends GetxService {
         toRemove.add(id);
       }
     }
-    // 双向确认用户取消关注后标签内是否还有该用户
     // 在遍历结束后统一移除不在 followList 中的 id
     tag.userId.removeWhere((id) => toRemove.contains(id));
     // 更新数据库
@@ -110,13 +118,38 @@ class FollowService extends GetxService {
     }
     // 标签内排序
     curTagFollowList.sort(
-      (a, b) => b.liveStatus.value.compareTo(a.liveStatus.value),
+      (a, b) {
+        if (a.liveStatus.value != b.liveStatus.value) {
+          return b.liveStatus.value.compareTo(a.liveStatus.value);
+        }
+        return b.watchDuration!
+            .toDuration()
+            .compareTo(a.watchDuration!.toDuration());
+      },
     );
   }
 
   // 添加关注
-  Future<void> addFollow(FollowUser follow) async {
-    await DBService.instance.addFollow(follow);
+  void addFollow(FollowUser follow) {
+    DBService.instance.addFollow(follow);
+  }
+
+  // 取消关注
+  void removeFollowUser(String id) {
+    DBService.instance.deleteFollow(id);
+  }
+
+  // 更新关注的历史记录
+  void updateFollow(History history) {
+    var follow =
+        followList.where((follow) => follow.id == history.id).firstOrNull;
+    if (follow == null) {
+      return;
+    } else {
+      follow.watchDuration = history.watchDuration;
+      addFollow(follow);
+    }
+    Log.i("已更新当前播放的观看时长：${follow.watchDuration}");
   }
 
   void initTimer() {
@@ -187,6 +220,8 @@ class FollowService extends GetxService {
       if (item.liveStatus.value == 2) {
         // 只有正在直播时才查详细信息
         var detail = await site.liveSite.getRoomDetail(roomId: item.roomId);
+        item.liveTitle = detail.title;
+        item.liveAreaName = detail.areaName;
         item.liveStartTime = detail.showTime;
       } else {
         item.liveStartTime = null;
@@ -196,7 +231,9 @@ class FollowService extends GetxService {
       item.liveStatus.value = 0;
       item.liveStartTime = null;
     } finally {
-      updatedCount++;
+      await _lock.synchronized(() {
+        updatedCount++;
+      });
       if (updatedCount >= followList.length) {
         filterData();
         updating.value = false;
@@ -205,7 +242,17 @@ class FollowService extends GetxService {
   }
 
   void filterData() {
-    followList.sort((a, b) => b.liveStatus.value.compareTo(a.liveStatus.value));
+    followList.sort((a, b) {
+      if (a.liveStatus.value != b.liveStatus.value) {
+        return b.liveStatus.value.compareTo(a.liveStatus.value);
+      }
+
+      final aDuration = a.watchDuration?.toDuration() ?? Duration.zero;
+      final bDuration = b.watchDuration?.toDuration() ?? Duration.zero;
+
+      return bDuration.compareTo(aDuration);
+    });
+
     liveList.assignAll(followList.where((x) => x.liveStatus.value == 2));
     notLiveList.assignAll(followList.where((x) => x.liveStatus.value == 1));
     _updatedListController.add(0);
@@ -218,7 +265,7 @@ class FollowService extends GetxService {
     }
 
     try {
-      var status = await Utils.checkStorgePermission();
+      var status = await Utils.checkStoragePermission();
       if (!status) {
         SmartDialog.showToast("无权限");
         return;
@@ -247,7 +294,7 @@ class FollowService extends GetxService {
 
   void inputFile() async {
     try {
-      var status = await Utils.checkStorgePermission();
+      var status = await Utils.checkStoragePermission();
       if (!status) {
         SmartDialog.showToast("无权限");
         return;

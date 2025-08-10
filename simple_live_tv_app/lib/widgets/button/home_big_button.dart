@@ -36,14 +36,12 @@ class HomeBigButton extends StatelessWidget {
             children: [
               Container(
                 padding: AppStyle.edgeInsetsA12,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                ),
+                decoration: const BoxDecoration(shape: BoxShape.circle),
                 child: Icon(
                   iconData,
                   size: 64.w,
                   color:
-                      focusNode.isFoucsed.value ? Colors.black : Colors.white,
+                      focusNode.isFocused.value ? Colors.black : Colors.white,
                 ),
               ),
               AppStyle.vGap24,
@@ -52,7 +50,7 @@ class HomeBigButton extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 36.w,
                   color:
-                      focusNode.isFoucsed.value ? Colors.black : Colors.white,
+                      focusNode.isFocused.value ? Colors.black : Colors.white,
                 ),
               ),
             ],

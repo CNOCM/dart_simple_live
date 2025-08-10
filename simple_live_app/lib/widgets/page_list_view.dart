@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:simple_live_app/app/controller/base_controller.dart';
 import 'package:simple_live_app/widgets/status/app_empty_widget.dart';
 import 'package:simple_live_app/widgets/status/app_error_widget.dart';
-import 'package:simple_live_app/widgets/status/app_loadding_widget.dart';
+import 'package:simple_live_app/widgets/status/app_loading_widget.dart';
 
 import 'package:flutter_easyrefresh/easy_refresh.dart';
 import 'package:get/get.dart';
@@ -18,19 +18,19 @@ class PageListView extends StatelessWidget {
   final EdgeInsets? padding;
   final bool firstRefresh;
   final Function()? onLoginSuccess;
-  final bool showPageLoadding;
+  final bool showPageLoading;
   final bool showPCRefreshButton;
   const PageListView({
     required this.itemBuilder,
     required this.pageController,
     this.padding,
     this.firstRefresh = false,
-    this.showPageLoadding = false,
+    this.showPageLoading = false,
     this.showPCRefreshButton = true,
     this.separatorBuilder,
     this.onLoginSuccess,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +67,7 @@ class PageListView extends StatelessWidget {
                       Platform.isLinux ||
                       Platform.isMacOS) &&
                   pageController.canLoadMore.value &&
-                  !pageController.pageLoadding.value &&
+                  !pageController.pageLoading.value &&
                   !pageController.pageEmpty.value,
               child: Center(
                 child: TextButton(
@@ -86,7 +86,7 @@ class PageListView extends StatelessWidget {
                       Platform.isLinux ||
                       Platform.isMacOS) &&
                   pageController.canLoadMore.value &&
-                  !pageController.pageLoadding.value &&
+                  !pageController.pageLoading.value &&
                   !pageController.pageEmpty.value &&
                   showPCRefreshButton,
               child: Center(
@@ -110,8 +110,8 @@ class PageListView extends StatelessWidget {
             ),
           ),
           Offstage(
-            offstage: !(showPageLoadding && pageController.pageLoadding.value),
-            child: const AppLoaddingWidget(),
+            offstage: !(showPageLoading && pageController.pageLoading.value),
+            child: const AppLoadingWidget(),
           ),
           Offstage(
             offstage: !pageController.pageError.value,

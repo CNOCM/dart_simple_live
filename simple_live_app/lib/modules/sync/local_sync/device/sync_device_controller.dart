@@ -12,7 +12,7 @@ import 'package:simple_live_app/services/db_service.dart';
 import 'package:simple_live_app/services/sync_service.dart';
 
 class SyncDeviceController extends BaseController {
-  final SyncClinet client;
+  final SyncClient client;
   final SyncClientInfoModel info;
   SyncDeviceController({required this.client, required this.info});
   SyncClientRequest request = SyncClientRequest();
@@ -51,8 +51,8 @@ class SyncDeviceController extends BaseController {
     try {
       var overlay = await showOverlayDialog();
       SmartDialog.showLoading(msg: "同步中...");
-      var histores = DBService.instance.getHistores();
-      var data = json.encode(histores.map((e) => e.toJson()).toList());
+      var histories = DBService.instance.getHistories();
+      var data = json.encode(histories.map((e) => e.toJson()).toList());
       await request.syncHistory(client, data, overlay: overlay);
       SmartDialog.showToast("已同步历史记录");
     } catch (e) {
@@ -81,7 +81,7 @@ class SyncDeviceController extends BaseController {
 
   void syncBiliAccount() async {
     try {
-      if (!BiliBiliAccountService.instance.logined.value) {
+      if (!BiliBiliAccountService.instance.logged.value) {
         SmartDialog.showToast("未登录哔哩哔哩");
         return;
       }

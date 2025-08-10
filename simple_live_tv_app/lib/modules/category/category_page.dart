@@ -45,7 +45,7 @@ class CategoryPage extends GetView<CategoryController> {
               const Spacer(),
               Obx(
                 () => Visibility(
-                  visible: controller.loadding.value,
+                  visible: controller.loading.value,
                   child: SizedBox(
                     width: 48.w,
                     height: 48.w,
@@ -76,11 +76,7 @@ class CategoryPage extends GetView<CategoryController> {
                 .map(
                   (e) => Obx(
                     () => HighlightButton(
-                      icon: Image.asset(
-                        e.logo,
-                        width: 48.w,
-                        height: 48.w,
-                      ),
+                      icon: Image.asset(e.logo, width: 48.w, height: 48.w),
                       text: e.name,
                       selected: controller.siteId.value == e.id,
                       focusNode: AppFocusNode(),
@@ -106,10 +102,7 @@ class CategoryPage extends GetView<CategoryController> {
                     children: [
                       Padding(
                         padding: AppStyle.edgeInsetsV32,
-                        child: Text(
-                          item.name,
-                          style: AppStyle.titleStyleWhite,
-                        ),
+                        child: Text(item.name, style: AppStyle.titleStyleWhite),
                       ),
                       Obx(
                         () => GridView.count(
@@ -121,14 +114,10 @@ class CategoryPage extends GetView<CategoryController> {
                           mainAxisSpacing: 36.w,
                           children: item.showAll.value
                               ? (item.childrenExt
-                                  .map(
-                                    (e) => buildSubCategory(e),
-                                  )
+                                  .map((e) => buildSubCategory(e))
                                   .toList())
                               : (item.take15
-                                  .map(
-                                    (e) => buildSubCategory(e),
-                                  )
+                                  .map((e) => buildSubCategory(e))
                                   .toList()
                                 ..add(buildShowMore(item))),
                         ),
@@ -173,7 +162,7 @@ class CategoryPage extends GetView<CategoryController> {
             item.name,
             maxLines: 1,
             textAlign: TextAlign.center,
-            style: item.focusNode.isFoucsed.value
+            style: item.focusNode.isFocused.value
                 ? AppStyle.textStyleBlack
                 : AppStyle.textStyleWhite,
           ),
@@ -195,7 +184,7 @@ class CategoryPage extends GetView<CategoryController> {
           "显示全部",
           maxLines: 1,
           textAlign: TextAlign.center,
-          style: item.moreFocusNode.isFoucsed.value
+          style: item.moreFocusNode.isFocused.value
               ? AppStyle.textStyleBlack
               : AppStyle.textStyleWhite,
         ),

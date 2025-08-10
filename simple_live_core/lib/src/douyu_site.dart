@@ -2,19 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:crypto/crypto.dart';
+import 'package:flutter_js/flutter_js.dart';
+import 'package:simple_live_core/simple_live_core.dart';
 import 'package:simple_live_core/src/common/http_client.dart';
-import 'package:simple_live_core/src/danmaku/douyu_danmaku.dart';
-import 'package:simple_live_core/src/interface/live_danmaku.dart';
-import 'package:simple_live_core/src/interface/live_site.dart';
-import 'package:simple_live_core/src/model/live_anchor_item.dart';
-import 'package:simple_live_core/src/model/live_category.dart';
-import 'package:simple_live_core/src/model/live_message.dart';
-import 'package:simple_live_core/src/model/live_play_url.dart';
-import 'package:simple_live_core/src/model/live_room_item.dart';
-import 'package:simple_live_core/src/model/live_search_result.dart';
-import 'package:simple_live_core/src/model/live_room_detail.dart';
-import 'package:simple_live_core/src/model/live_play_quality.dart';
-import 'package:simple_live_core/src/model/live_category_result.dart';
+import 'package:simple_live_core/src/common/js_engine.dart';
 import 'package:html_unescape/html_unescape.dart';
 
 class DouyuSite implements LiveSite {
@@ -28,7 +20,7 @@ class DouyuSite implements LiveSite {
   LiveDanmaku getDanmaku() => DouyuDanmaku();
 
   @override
-  Future<List<LiveCategory>> getCategores() async {
+  Future<List<LiveCategory>> getCategories() async {
     List<LiveCategory> categories = [];
     var result =
         await HttpClient.instance.getJson("https://m.douyu.com/api/cate/list");
@@ -86,7 +78,7 @@ class DouyuSite implements LiveSite {
   }
 
   @override
-  Future<List<LivePlayQuality>> getPlayQualites(
+  Future<List<LivePlayQuality>> getPlayQualities(
       {required LiveRoomDetail detail}) async {
     var data = detail.data.toString();
     data += "&cdn=&rate=-1&ver=Douyu_223061205&iar=1&ive=1&hevc=0&fa=0";
@@ -227,11 +219,14 @@ class DouyuSite implements LiveSite {
       online: int.tryParse(roomInfo["room_biz_all"]["hot"].toString()) ?? 0,
       roomId: roomInfo["room_id"].toString(),
       title: roomInfo["room_name"].toString(),
+      areaName: roomInfo["second_lvl_name"].toString(),
       userName: roomInfo["owner_name"].toString(),
       userAvatar: roomInfo["owner_avatar"].toString(),
       introduction: roomInfo["show_details"].toString(),
       notice: "",
-      status: roomInfo["show_status"] == 1 && roomInfo["videoLoop"] != 1,
+      status: roomInfo["show_status"] == 1 &&
+          roomInfo["videoLoop"] != 1 &&
+          !roomInfo["room_name"].startsWith("【回放】"),
       danmakuData: roomInfo["room_id"].toString(),
       data: await getPlayArgs(crptext, roomInfo["room_id"].toString()),
       url: "https://www.douyu.com/$roomId",
@@ -346,7 +341,9 @@ class DouyuSite implements LiveSite {
   @override
   Future<bool> getLiveStatus({required String roomId}) async {
     var roomInfo = await _getRoomInfo(roomId);
-    return roomInfo["show_status"] == 1 && roomInfo["videoLoop"] != 1;
+    return roomInfo["show_status"] == 1 &&
+        roomInfo["videoLoop"] != 1 &&
+        !roomInfo["room_name"].startsWith("【回放】");
   }
 
   Future<String> getPlayArgs(String html, String rid) async {
@@ -359,14 +356,31 @@ class DouyuSite implements LiveSite {
         "";
     html = html.replaceAll(RegExp(r"eval.*?;}"), "strc;}");
 
-    var result = await HttpClient.instance.postJson(
-        "http://alive.nsapps.cn/api/AllLive/DouyuSign",
-        data: {"html": html, "rid": rid});
-
-    if (result["code"] == 0) {
-      return result["data"].toString();
+    try {
+      var did = '10000000000000000000000000001501';
+      JsEngine.init();
+      JsEvalResult jsEvalResult =
+          JsEngine.jsRuntime.evaluate("$html;ub98484234();");
+      var res = jsEvalResult.stringResult;
+      String t10 = (DateTime.now().millisecondsSinceEpoch ~/ 1000).toString();
+      RegExp vReg = RegExp(r'v=(\d+)');
+      Match? vMatch = vReg.firstMatch(res);
+      String? v = vMatch?.group(1);
+      String rb =
+          md5.convert(utf8.encode(rid + did + t10 + (v ?? ""))).toString();
+      String jsSign = res
+          .replaceAll(RegExp(r'return rt;}\);?'), 'return rt;}')
+          .replaceAll('(function (', 'function sign(')
+          .replaceAll('CryptoJS.MD5(cb).toString()', '"$rb"');
+      final params = JsEngine.jsRuntime
+          .evaluate("$jsSign;sign($rid,'$did',$t10);")
+          .stringResult;
+      return params;
+    } catch (e) {
+      CoreLog.error(e);
+      return "";
     }
-    return "";
+    // 自部署：https://github.com/SlotSun/simple_live_api
   }
 
   int parseHotNum(String hn) {

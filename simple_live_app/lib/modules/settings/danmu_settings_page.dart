@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ns_danmaku/ns_danmaku.dart';
+import 'package:canvas_danmaku/canvas_danmaku.dart';
+
 import 'package:simple_live_app/app/app_style.dart';
 import 'package:simple_live_app/app/controller/app_settings_controller.dart';
 import 'package:simple_live_app/routes/route_path.dart';
@@ -10,7 +11,7 @@ import 'package:simple_live_app/widgets/settings/settings_number.dart';
 import 'package:simple_live_app/widgets/settings/settings_switch.dart';
 
 class DanmuSettingsPage extends StatelessWidget {
-  const DanmuSettingsPage({Key? key}) : super(key: key);
+  const DanmuSettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -156,7 +157,7 @@ class DanmuSettingsView extends GetView<AppSettingsController> {
                     controller.setDanmuFontWeight(e);
                     updateDanmuOption(
                       danmakuController?.option.copyWith(
-                        fontWeight: FontWeight.values[e],
+                        fontWeight: e,
                       ),
                     );
                   },
@@ -173,8 +174,7 @@ class DanmuSettingsView extends GetView<AppSettingsController> {
                   onChanged: (e) {
                     controller.setDanmuSpeed(e.toDouble());
                     updateDanmuOption(
-                      danmakuController?.option
-                          .copyWith(duration: e.toDouble()),
+                      danmakuController?.option.copyWith(duration: e),
                     );
                   },
                 ),
@@ -189,8 +189,7 @@ class DanmuSettingsView extends GetView<AppSettingsController> {
                   onChanged: (e) {
                     controller.setDanmuStrokeWidth(e.toDouble());
                     updateDanmuOption(
-                      danmakuController?.option
-                          .copyWith(strokeWidth: e.toDouble()),
+                      danmakuController?.option.copyWith(showStroke: e >= 1),
                     );
                   },
                 ),

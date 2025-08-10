@@ -244,8 +244,8 @@ class RemoteSyncRoomController extends BaseController {
       }
       var overlay = await showOverlayDialog();
       SmartDialog.showLoading(msg: "发送中...");
-      var histores = DBService.instance.getHistores();
-      var data = json.encode(histores.map((e) => e.toJson()).toList());
+      var histories = DBService.instance.getHistories();
+      var data = json.encode(histories.map((e) => e.toJson()).toList());
       var resp = await signalR.sendContent(
         roomName: currentRoomId.value,
         action: "SendHistory",
@@ -301,7 +301,7 @@ class RemoteSyncRoomController extends BaseController {
         SmartDialog.showToast("无设备连接");
         return;
       }
-      if (!BiliBiliAccountService.instance.logined.value) {
+      if (!BiliBiliAccountService.instance.logged.value) {
         SmartDialog.showToast("未登录哔哩哔哩");
         return;
       }

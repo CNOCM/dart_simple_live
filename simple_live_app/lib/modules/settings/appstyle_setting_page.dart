@@ -6,7 +6,7 @@ import 'package:simple_live_app/widgets/settings/settings_card.dart';
 import 'package:simple_live_app/widgets/settings/settings_switch.dart';
 
 class AppstyleSettingPage extends GetView<AppSettingsController> {
-  const AppstyleSettingPage({Key? key}) : super(key: key);
+  const AppstyleSettingPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +110,7 @@ class AppstyleSettingPage extends GetView<AppSettingsController> {
                             .map(
                               (e) => GestureDetector(
                                 onTap: () {
-                                  controller.setStyleColor(e.value);
+                                  controller.setStyleColor(e.toARGB32());
                                   Get.forceAppUpdate();
                                 },
                                 child: Container(
@@ -129,7 +129,7 @@ class AppstyleSettingPage extends GetView<AppSettingsController> {
                                       child: Icon(
                                         Icons.check,
                                         color: controller.styleColor.value ==
-                                                e.value
+                                                e.toARGB32()
                                             ? Colors.white
                                             : Colors.transparent,
                                       ),

@@ -17,11 +17,11 @@ void testSite(LiveSite site) async {
     }
   });
 
-  var categores = <LiveCategory>[];
-  test('getCategores', () async {
-    categores = await site.getCategores();
-    expect(categores, isNotEmpty);
-    for (var item in categores) {
+  var categories = <LiveCategory>[];
+  test('getCategories', () async {
+    categories = await site.getCategories();
+    expect(categories, isNotEmpty);
+    for (var item in categories) {
       expect(item.name, isNotEmpty);
       for (var subItem in item.children) {
         expect(subItem.name, isNotEmpty);
@@ -33,7 +33,7 @@ void testSite(LiveSite site) async {
   });
 
   test('getCategoryRooms', () async {
-    var result = await site.getCategoryRooms(categores.first.children.first);
+    var result = await site.getCategoryRooms(categories.first.children.first);
     expect(result, isNotNull);
     expect(result.items, isNotEmpty);
     for (var item in result.items) {
@@ -84,7 +84,7 @@ void testSite(LiveSite site) async {
 
   List<LivePlayQuality> playQualities = [];
   test('getPlayQuality', () async {
-    playQualities = await site.getPlayQualites(detail: roomDetail!);
+    playQualities = await site.getPlayQualities(detail: roomDetail!);
     expect(playQualities, isNotEmpty);
     for (var item in playQualities) {
       expect(item.quality, isNotEmpty);

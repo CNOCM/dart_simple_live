@@ -1,9 +1,9 @@
 import 'dart:io';
+import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:media_kit_video/media_kit_video.dart';
-import 'package:ns_danmaku/ns_danmaku.dart';
 import 'package:remixicon/remixicon.dart';
 import 'package:simple_live_app/app/app_style.dart';
 import 'package:simple_live_app/app/controller/app_settings_controller.dart';
@@ -52,7 +52,8 @@ Widget buildFullControls(
 
         // 左下角SC显示
         Visibility(
-          visible: (!Platform.isAndroid && !Platform.isIOS) || controller.fullScreenState.value,
+          visible: (!Platform.isAndroid && !Platform.isIOS) ||
+              controller.fullScreenState.value,
           child: Positioned(
             left: 24,
             bottom: 24,
@@ -286,7 +287,8 @@ Widget buildFullControls(
                       padding: const EdgeInsets.only(left: 8.0),
                       child: Text(
                         controller.liveDuration.value,
-                        style: const TextStyle(fontSize: 14, color: Colors.white),
+                        style:
+                            const TextStyle(fontSize: 14, color: Colors.white),
                       ),
                     ),
                   ),
@@ -308,7 +310,7 @@ Widget buildFullControls(
                   ),
                   TextButton(
                     onPressed: () {
-                      showQualitesInfo(controller);
+                      showQualitiesInfo(controller);
                     },
                     child: Obx(
                       () => Text(
@@ -433,7 +435,8 @@ Widget buildControls(
 
       // 左下角SC显示
       Visibility(
-        visible: (!Platform.isAndroid && !Platform.isIOS) || controller.fullScreenState.value,
+        visible: (!Platform.isAndroid && !Platform.isIOS) ||
+            controller.fullScreenState.value,
         child: Positioned(
           left: 24,
           bottom: 24,
@@ -462,12 +465,19 @@ Widget buildControls(
           onVerticalDragUpdate: controller.onVerticalDragUpdate,
           onVerticalDragEnd: controller.onVerticalDragEnd,
           //onLongPress: controller.showDebugInfo,
-          child: MouseRegion(
-            onEnter: controller.onEnter,
-            child: Container(
-              width: double.infinity,
-              height: double.infinity,
-              color: Colors.transparent,
+          child: Obx(
+            () => MouseRegion(
+              onEnter: controller.onEnter,
+              cursor: controller.fullScreenState.value
+                  ? (controller.showCursorState.value
+                      ? SystemMouseCursors.basic
+                      : SystemMouseCursors.none)
+                  : SystemMouseCursors.basic,
+              child: Container(
+                width: double.infinity,
+                height: double.infinity,
+                color: Colors.transparent,
+              ),
             ),
           ),
         ),
@@ -638,11 +648,15 @@ Widget buildControls(
 
 Widget buildDanmuView(VideoState videoState, LiveRoomController controller) {
   var padding = MediaQuery.of(videoState.context).padding;
-  controller.danmakuView ??= DanmakuView(
-    key: controller.globalDanmuKey,
+  controller.danmakuView ??= DanmakuScreen(
     createdController: controller.initDanmakuController,
     option: DanmakuOption(
-      fontSize: 16,
+      fontSize: AppSettingsController.instance.danmuSize.value,
+      area: AppSettingsController.instance.danmuArea.value,
+      duration: AppSettingsController.instance.danmuSpeed.value.toInt(),
+      opacity: AppSettingsController.instance.danmuOpacity.value,
+      showStroke: AppSettingsController.instance.danmuStrokeWidth.value > 0,
+      fontWeight: AppSettingsController.instance.danmuFontWeight.value,
     ),
   );
   return Positioned.fill(
@@ -718,7 +732,7 @@ void showLinesInfo(LiveRoomController controller) {
   );
 }
 
-void showQualitesInfo(LiveRoomController controller) {
+void showQualitiesInfo(LiveRoomController controller) {
   if (controller.isVertical.value) {
     controller.showQualitySheet();
     return;
@@ -728,9 +742,9 @@ void showQualitesInfo(LiveRoomController controller) {
     useSystem: true,
     child: ListView.builder(
       padding: EdgeInsets.zero,
-      itemCount: controller.qualites.length,
+      itemCount: controller.qualities.length,
       itemBuilder: (_, i) {
-        var item = controller.qualites[i];
+        var item = controller.qualities[i];
         return ListTile(
           selected: controller.currentQuality == i,
           title: Text(
@@ -907,7 +921,11 @@ class PlayerSuperChatCard extends StatefulWidget {
   final LiveSuperChatMessage message;
   final VoidCallback onExpire;
   final int duration;
-  const PlayerSuperChatCard({required this.message, required this.onExpire, required this.duration, Key? key}) : super(key: key);
+  const PlayerSuperChatCard(
+      {required this.message,
+      required this.onExpire,
+      required this.duration,
+      super.key});
   @override
   State<PlayerSuperChatCard> createState() => _PlayerSuperChatCardState();
 }
@@ -930,11 +948,13 @@ class _PlayerSuperChatCardState extends State<PlayerSuperChatCard> {
       });
     });
   }
+
   @override
   void dispose() {
     timer.cancel();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return Opacity(
@@ -957,7 +977,7 @@ class LocalDisplaySC {
 
 class PlayerSuperChatOverlay extends StatefulWidget {
   final LiveRoomController controller;
-  const PlayerSuperChatOverlay({required this.controller, Key? key}) : super(key: key);
+  const PlayerSuperChatOverlay({required this.controller, super.key});
   @override
   State<PlayerSuperChatOverlay> createState() => _PlayerSuperChatOverlayState();
 }
@@ -994,7 +1014,8 @@ class _PlayerSuperChatOverlayState extends State<PlayerSuperChatOverlay> {
       }
     }
     // 监听SC列表变化
-    _worker = ever<List<LiveSuperChatMessage>>(widget.controller.superChats, (list) {
+    _worker =
+        ever<List<LiveSuperChatMessage>>(widget.controller.superChats, (list) {
       // 新增
       for (var sc in list) {
         if (!_displayed.any((e) => e.sc == sc)) {
@@ -1018,7 +1039,8 @@ class _PlayerSuperChatOverlayState extends State<PlayerSuperChatOverlay> {
 
   @override
   Widget build(BuildContext context) {
-    final sorted = _displayed.toList()..sort((a, b) => a.sc.endTime.compareTo(b.sc.endTime));
+    final sorted = _displayed.toList()
+      ..sort((a, b) => a.sc.endTime.compareTo(b.sc.endTime));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

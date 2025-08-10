@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
-import 'package:ns_danmaku/ns_danmaku.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:simple_live_app/app/app_style.dart';
 import 'package:simple_live_app/app/constant.dart';
@@ -22,9 +22,11 @@ import 'package:simple_live_app/modules/live_room/player/player_controller.dart'
 import 'package:simple_live_app/modules/settings/danmu_settings_page.dart';
 import 'package:simple_live_app/services/db_service.dart';
 import 'package:simple_live_app/services/follow_service.dart';
+import 'package:simple_live_app/services/history_service.dart';
 import 'package:simple_live_app/widgets/desktop_refresh_button.dart';
 import 'package:simple_live_app/widgets/follow_user_item.dart';
 import 'package:simple_live_core/simple_live_core.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
@@ -63,7 +65,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   RxList<LiveMessage> messages = RxList<LiveMessage>();
 
   /// 清晰度数据
-  RxList<LivePlayQuality> qualites = RxList<LivePlayQuality>();
+  RxList<LivePlayQuality> qualities = RxList<LivePlayQuality>();
 
   /// 当前清晰度
   var currentQuality = -1;
@@ -195,7 +197,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   }
 
   /// 初始化弹幕接收事件
-  void initDanmau() {
+  void initDanmaku() {
     liveDanmaku.onMessage = onWSMessage;
     liveDanmaku.onClose = onWSClose;
     liveDanmaku.onReady = onWSReady;
@@ -237,8 +239,8 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
         return;
       }
 
-      addDanmaku([
-        DanmakuItem(
+      danmakuController?.addDanmaku(
+        DanmakuContentItem(
           msg.message,
           color: Color.fromARGB(
             255,
@@ -246,8 +248,9 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
             msg.color.g,
             msg.color.b,
           ),
+          selfSend: false,
         ),
-      ]);
+      );
     } else if (msg.type == LiveMessageType.online) {
       online.value = msg.data;
     } else if (msg.type == LiveMessageType.superChat) {
@@ -320,13 +323,13 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
       online.value = detail.value!.online;
       liveStatus.value = detail.value!.status || detail.value!.isRecord;
       if (liveStatus.value) {
-        getPlayQualites();
+        getPlayQualities();
       }
       if (detail.value!.isRecord) {
         addSysMsg("当前主播未开播，正在轮播录像");
       }
       addSysMsg("开始连接弹幕服务器");
-      initDanmau();
+      initDanmaku();
       liveDanmaku.start(detail.value?.danmakuData);
       startLiveDurationTimer(); // 启动开播时长定时器
     } catch (e) {
@@ -340,29 +343,29 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   }
 
   /// 初始化播放器
-  void getPlayQualites() async {
-    qualites.clear();
+  void getPlayQualities() async {
+    qualities.clear();
     currentQuality = -1;
 
     try {
-      var playQualites =
-          await site.liveSite.getPlayQualites(detail: detail.value!);
+      var playQualities =
+          await site.liveSite.getPlayQualities(detail: detail.value!);
 
-      if (playQualites.isEmpty) {
+      if (playQualities.isEmpty) {
         SmartDialog.showToast("无法读取播放清晰度");
         return;
       }
-      qualites.value = playQualites;
+      qualities.value = playQualities;
       var qualityLevel = await getQualityLevel();
       if (qualityLevel == 2) {
         //最高
         currentQuality = 0;
       } else if (qualityLevel == 0) {
         //最低
-        currentQuality = playQualites.length - 1;
+        currentQuality = playQualities.length - 1;
       } else {
         //中间值
-        int middle = (playQualites.length / 2).floor();
+        int middle = (playQualities.length / 2).floor();
         currentQuality = middle;
       }
 
@@ -389,11 +392,11 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
 
   void getPlayUrl() async {
     playUrls.clear();
-    currentQualityInfo.value = qualites[currentQuality].quality;
+    currentQualityInfo.value = qualities[currentQuality].quality;
     currentLineInfo.value = "";
     currentLineIndex = -1;
     var playUrl = await site.liveSite
-        .getPlayUrls(detail: detail.value!, quality: qualites[currentQuality]);
+        .getPlayUrls(detail: detail.value!, quality: qualities[currentQuality]);
     if (playUrl.urls.isEmpty) {
       SmartDialog.showToast("无法读取播放地址");
       return;
@@ -513,11 +516,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
       return;
     }
     var id = "${site.id}_$roomId";
-    var history = DBService.instance.getHistory(id);
-    if (history != null) {
-      history.updateTime = DateTime.now();
-    }
-    history ??= History(
+    History history = History(
       id: id,
       roomId: roomId,
       siteId: site.id,
@@ -525,8 +524,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
       face: detail.value?.userAvatar ?? "",
       updateTime: DateTime.now(),
     );
-
-    DBService.instance.addOrUpdateHistory(history);
+    HistoryService.instance.start(history);
   }
 
   /// 关注用户
@@ -535,7 +533,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
       return;
     }
     var id = "${site.id}_$roomId";
-    DBService.instance.addFollow(
+    FollowService.instance.addFollow(
       FollowUser(
         id: id,
         roomId: roomId,
@@ -559,7 +557,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     }
 
     var id = "${site.id}_$roomId";
-    DBService.instance.deleteFollow(id);
+    FollowService.instance.removeFollowUser(id);
     followed.value = false;
     EventBus.instance.emit(Constant.kUpdateFollow, id);
   }
@@ -586,13 +584,22 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
       return;
     }
     var playUrl = await site.liveSite
-        .getPlayUrls(detail: detail.value!, quality: qualites[currentQuality]);
+        .getPlayUrls(detail: detail.value!, quality: qualities[currentQuality]);
     if (playUrl.urls.isEmpty) {
       SmartDialog.showToast("无法读取播放地址");
       return;
     }
     Utils.copyToClipboard(playUrl.urls.first);
     SmartDialog.showToast("已复制播放直链");
+  }
+
+  Future<void> visitWebLive() async {
+    var uri = Uri.parse(detail.value!.url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      throw '无法打开网页 $uri';
+    }
   }
 
   /// 底部打开播放器设置
@@ -650,9 +657,9 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     Utils.showBottomSheet(
       title: "切换清晰度",
       child: ListView.builder(
-        itemCount: qualites.length,
+        itemCount: qualities.length,
         itemBuilder: (_, i) {
-          var item = qualites[i];
+          var item = qualities[i];
           return RadioListTile(
             value: i,
             groupValue: currentQuality,
@@ -948,32 +955,37 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     );
   }
 
-  void openNaviteAPP() async {
-    var naviteUrl = "";
-    var webUrl = "";
+  void openNativeAPP() async {
+    String nativeUrl = "";
+    String webUrl = "";
     if (site.id == Constant.kBiliBili) {
-      naviteUrl = "bilibili://live/${detail.value?.roomId}";
+      nativeUrl = "bilibili://live/${detail.value?.roomId}";
       webUrl = "https://live.bilibili.com/${detail.value?.roomId}";
     } else if (site.id == Constant.kDouyin) {
       var args = detail.value?.danmakuData as DouyinDanmakuArgs;
-      naviteUrl = "snssdk1128://webcast_room?room_id=${args.roomId}";
+      nativeUrl = "snssdk1128://webcast_room?room_id=${args.roomId}";
       webUrl = "https://live.douyin.com/${args.webRid}";
     } else if (site.id == Constant.kHuya) {
       var args = detail.value?.danmakuData as HuyaDanmakuArgs;
-      naviteUrl =
+      nativeUrl =
           "yykiwi://homepage/index.html?banneraction=https%3A%2F%2Fdiy-front.cdn.huya.com%2Fzt%2Ffrontpage%2Fcc%2Fupdate.html%3Fhyaction%3Dlive%26channelid%3D${args.subSid}%26subid%3D${args.subSid}%26liveuid%3D${args.subSid}%26screentype%3D1%26sourcetype%3D0%26fromapp%3Dhuya_wap%252Fclick%252Fopen_app_guide%26&fromapp=huya_wap/click/open_app_guide";
       webUrl = "https://www.huya.com/${detail.value?.roomId}";
     } else if (site.id == Constant.kDouyu) {
-      naviteUrl =
+      nativeUrl =
           "douyulink://?type=90001&schemeUrl=douyuapp%3A%2F%2Froom%3FliveType%3D0%26rid%3D${detail.value?.roomId}";
       webUrl = "https://www.douyu.com/${detail.value?.roomId}";
     }
     try {
-      await launchUrlString(naviteUrl, mode: LaunchMode.externalApplication);
+      if (Platform.isAndroid || Platform.isIOS) {
+        await launchUrlString(nativeUrl, mode: LaunchMode.externalApplication);
+      } else {
+        await launchUrlString(webUrl, mode: LaunchMode.externalApplication);
+
+        return;
+      }
     } catch (e) {
       Log.logPrint(e);
-      SmartDialog.showToast("无法打开APP，将使用浏览器打开");
-      await launchUrlString(webUrl, mode: LaunchMode.externalApplication);
+      SmartDialog.showToast("当前平台不支持直接打开APP");
     }
   }
 
@@ -999,6 +1011,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
 
     // 刷新信息
     loadData();
+    HistoryService.instance.reset("${site.id}_$roomId");
   }
 
   void copyErrorDetail() {
@@ -1064,6 +1077,7 @@ ${error?.stackTrace}''');
     WidgetsBinding.instance.removeObserver(this);
     scrollController.removeListener(scrollListener);
     autoExitTimer?.cancel();
+    HistoryService.instance.stop();
 
     liveDanmaku.stop();
     danmakuController = null;

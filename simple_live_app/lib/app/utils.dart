@@ -12,6 +12,8 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:simple_live_app/app/log.dart';
+import 'package:simple_live_app/requests/common_request.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 typedef TextValidate = bool Function(String text);
 
@@ -301,10 +303,6 @@ class Utils {
     return result;
   }
 
-  /// 多段指引用户内容的弹窗
-  /// - `content` 内容：可滚动
-  /// - `title` 顶部弹窗标题
-  /// - `actions` 底部按钮
   static Future<T?> showInformationHelpDialog<T>({
     required List<Widget> content,
     Widget? title,
@@ -315,12 +313,13 @@ class Utils {
         title: title ?? const Text("帮助"),
         scrollable: true,
         content: SingleChildScrollView(child: ListBody(children: content)),
-        actions: actions??[
-          TextButton(
-            onPressed: Get.back,
-            child: const Text("确定"),
-          ),
-        ],
+        actions: actions ??
+            [
+              TextButton(
+                onPressed: Get.back,
+                child: const Text("确定"),
+              ),
+            ],
       ),
     );
     return result;
@@ -366,6 +365,68 @@ class Utils {
     return result;
   }
 
+  static void checkUpdate({bool showMsg = false}) async {
+    try {
+      int currentVer = Utils.parseVersion(packageInfo.version);
+      CommonRequest request = CommonRequest();
+      var versionInfo = await request.checkUpdate();
+      if (versionInfo.versionNum > currentVer) {
+        Get.dialog(
+          AlertDialog(
+            title: Text(
+              "发现新版本 ${versionInfo.version}",
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 18),
+            ),
+            content: Text(
+              versionInfo.versionDesc,
+              style: const TextStyle(fontSize: 14, height: 1.4),
+            ),
+            actionsPadding: AppStyle.edgeInsetsH12,
+            actions: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () {
+                        Get.back();
+                      },
+                      child: const Text("取消"),
+                    ),
+                  ),
+                  AppStyle.hGap12,
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                      ),
+                      onPressed: () {
+                        launchUrlString(
+                          versionInfo.downloadUrl,
+                          mode: LaunchMode.externalApplication,
+                        );
+                      },
+                      child: const Text("更新"),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      } else {
+        if (showMsg) {
+          SmartDialog.showToast("当前已经是最新版本了");
+        }
+      }
+    } catch (e) {
+      Log.logPrint(e);
+      if (showMsg) {
+        SmartDialog.showToast("检查更新失败");
+      }
+    }
+  }
 
   static int parseVersion(String version) {
     var sp = version.split('.');
@@ -410,7 +471,7 @@ class Utils {
   static final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
 
   /// 检查文件权限
-  static Future<bool> checkStorgePermission() async {
+  static Future<bool> checkStoragePermission() async {
     try {
       if (!Platform.isAndroid) {
         return true;

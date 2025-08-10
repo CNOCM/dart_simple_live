@@ -37,9 +37,7 @@ class HighlightButton extends StatelessWidget {
           height: 64.w,
           //width: 64.w,
           padding: AppStyle.edgeInsetsH24,
-          decoration: BoxDecoration(
-            borderRadius: AppStyle.radius32,
-          ),
+          decoration: BoxDecoration(borderRadius: AppStyle.radius32),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -49,7 +47,7 @@ class HighlightButton extends StatelessWidget {
                 text,
                 style: TextStyle(
                   fontSize: 28.w,
-                  color: (focusNode.isFoucsed.value || selected)
+                  color: (focusNode.isFocused.value || selected)
                       ? Colors.black
                       : Colors.white,
                 ),
@@ -69,7 +67,7 @@ class HighlightButton extends StatelessWidget {
             Icon(
               iconData,
               size: 40.w,
-              color: (focusNode.isFoucsed.value || selected)
+              color: (focusNode.isFocused.value || selected)
                   ? Colors.black
                   : Colors.white,
             ),

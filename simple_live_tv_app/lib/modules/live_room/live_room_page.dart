@@ -18,7 +18,7 @@ class LiveRoomPage extends GetView<LiveRoomController> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, result) async {
         if (!didPop) {
           //双击返回键退出
           if (controller.doubleClickExit) {
@@ -40,9 +40,7 @@ class LiveRoomPage extends GetView<LiveRoomController> {
         onKeyEvent: onKeyEvent,
         child: Scaffold(
           backgroundColor: Colors.black,
-          body: Obx(
-            () => buildMediaPlayer(),
-          ),
+          body: Obx(() => buildMediaPlayer()),
         ),
       ),
     );
@@ -144,13 +142,8 @@ class LiveRoomPage extends GetView<LiveRoomController> {
         Obx(
           () => Visibility(
             visible:
-                !controller.liveStatus.value && !controller.pageLoadding.value,
-            child: Center(
-              child: Text(
-                "未开播",
-                style: AppStyle.textStyleWhite,
-              ),
-            ),
+                !controller.liveStatus.value && !controller.pageLoading.value,
+            child: Center(child: Text("未开播", style: AppStyle.textStyleWhite)),
           ),
         ),
       ],

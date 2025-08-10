@@ -14,7 +14,7 @@ import 'package:simple_live_app/widgets/follow_user_item.dart';
 import 'package:simple_live_app/widgets/page_grid_view.dart';
 
 class FollowUserPage extends GetView<FollowUserController> {
-  const FollowUserPage({Key? key}) : super(key: key);
+  const FollowUserPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -100,23 +100,23 @@ class FollowUserPage extends GetView<FollowUserController> {
           ),
         ],
         leading: Obx(
-              () => FollowService.instance.updating.value
+          () => FollowService.instance.updating.value
               ? const IconButton(
-            onPressed: null,
-            icon: SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-              ),
-            ),
-          )
+                  onPressed: null,
+                  icon: SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                    ),
+                  ),
+                )
               : IconButton(
-            onPressed: () {
-              controller.refreshData();
-            },
-            icon: const Icon(Icons.refresh),
-          ),
+                  onPressed: () {
+                    controller.refreshData();
+                  },
+                  icon: const Icon(Icons.refresh),
+                ),
         ),
       ),
       body: Column(
@@ -128,7 +128,7 @@ class FollowUserPage extends GetView<FollowUserController> {
               children: [
                 Expanded(
                   child: Obx(
-                        () => SingleChildScrollView(
+                    () => SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: Wrap(
                           spacing: 12,
@@ -185,9 +185,9 @@ class FollowUserPage extends GetView<FollowUserController> {
       ...controller.tagList.skip(3),
     ];
     Rx<FollowUserTag> checkTag =
-    controller.tagList.indexOf(controller.filterMode.value) < 3
-        ? copiedList.first.obs
-        : controller.filterMode.value.obs;
+        controller.tagList.indexOf(controller.filterMode.value) < 3
+            ? copiedList.first.obs
+            : controller.filterMode.value.obs;
     final ScrollController scrollController = ScrollController();
     Get.dialog(
       AlertDialog(
@@ -222,7 +222,7 @@ class FollowUserPage extends GetView<FollowUserController> {
             ),
             const Divider(),
             Obx(
-                  () {
+              () {
                 int selectedIndex = copiedList.indexOf(checkTag.value);
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (selectedIndex >= 0) {
@@ -287,7 +287,8 @@ class FollowUserPage extends GetView<FollowUserController> {
             // 列表内容
             Expanded(
               child: Obx(
-                    () => ReorderableListView.builder(
+                () => ReorderableListView.builder(
+                  buildDefaultDragHandles: false,
                   itemCount: controller.userTagList.length,
                   itemBuilder: (context, index) {
                     // 偏移
@@ -308,6 +309,13 @@ class FollowUserPage extends GetView<FollowUserController> {
                           controller.removeTag(item);
                         },
                       ),
+                      trailing: ReorderableDelayedDragStartListener(
+                        index: index,
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 12.0),
+                          child: Icon(Icons.drag_handle),
+                        ),
+                      ),
                     );
                   },
                   onReorder: (int oldIndex, int newIndex) {
@@ -322,7 +330,7 @@ class FollowUserPage extends GetView<FollowUserController> {
 
   void editTagDialog(String title, {FollowUserTag? followUserTag}) {
     final TextEditingController tagEditController =
-    TextEditingController(text: followUserTag?.tag);
+        TextEditingController(text: followUserTag?.tag);
     bool upMode = title == "添加标签" ? true : false;
     Get.dialog(
       AlertDialog(
@@ -351,7 +359,7 @@ class FollowUserPage extends GetView<FollowUserController> {
                   contentPadding: AppStyle.edgeInsetsA12,
                   enabledBorder: OutlineInputBorder(
                     borderSide: BorderSide(
-                      color: Colors.grey.withOpacity(.2),
+                      color: Colors.grey.withValues(alpha: .2),
                     ),
                   ),
                 ),
@@ -359,7 +367,7 @@ class FollowUserPage extends GetView<FollowUserController> {
                   upMode
                       ? controller.addTag(tagEditController.text)
                       : controller.updateTagName(
-                      followUserTag!, tagEditController.text);
+                          followUserTag!, tagEditController.text);
                   Get.back();
                 },
               ),
@@ -380,7 +388,7 @@ class FollowUserPage extends GetView<FollowUserController> {
                         upMode
                             ? controller.addTag(tagEditController.text)
                             : controller.updateTagName(
-                            followUserTag!, tagEditController.text);
+                                followUserTag!, tagEditController.text);
                         Get.back();
                       },
                       child: const Text('是'),

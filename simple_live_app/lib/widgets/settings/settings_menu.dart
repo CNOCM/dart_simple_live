@@ -15,8 +15,8 @@ class SettingsMenu<T> extends StatelessWidget {
     required this.valueMap,
     this.subtitle,
     this.onChanged,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -38,18 +38,18 @@ class DouyinSearchController extends BaseController {
     if (Platform.isAndroid || Platform.isIOS) {
       webViewController!.loadUrl(
         urlRequest: URLRequest(
-          url: Uri.parse(searchUrl),
+          url: WebUri(searchUrl),
         ),
       );
     }
   }
 
   void onLoadStop(InAppWebViewController controller, Uri? uri) async {
-    pageLoadding.value = false;
+    pageLoading.value = false;
   }
 
   void onLoadStart(InAppWebViewController controller, Uri? uri) async {
-    pageLoadding.value = true;
+    pageLoading.value = true;
   }
 
   Future<bool?> onCreateWindow(InAppWebViewController controller,

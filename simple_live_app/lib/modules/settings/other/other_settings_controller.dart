@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -89,7 +90,7 @@ class OtherSettingsController extends BaseController {
     super.onInit();
   }
 
-  void setLogEnable(e) {
+  void setLogEnable(dynamic e) {
     AppSettingsController.instance.setLogEnable(e);
     if (e) {
       Log.initWriter();
@@ -163,7 +164,7 @@ class OtherSettingsController extends BaseController {
       };
 
       var bytes = Uint8List.fromList(utf8.encode(jsonEncode(data)));
-      
+
       // FilePicker 直接写入
       var inlineSave = Platform.isAndroid || Platform.isIOS || kIsWeb;
 
@@ -173,12 +174,12 @@ class OtherSettingsController extends BaseController {
         fileName: "simple_live_config.json",
         bytes: inlineSave ? bytes : null,
       );
-      
+
       if (path == null && !kIsWeb) {
         SmartDialog.showToast("保存取消");
         return;
       }
-      
+
       // 桌面平台需要手动写入
       if (!inlineSave && path != null) {
         await File(path).writeAsBytes(bytes);

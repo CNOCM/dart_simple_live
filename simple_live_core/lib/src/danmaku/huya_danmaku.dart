@@ -39,7 +39,7 @@ class HuyaDanmaku implements LiveDanmaku {
   Function()? onReady;
   String serverUrl = "wss://cdnws.api.huya.com";
 
-  WebScoketUtils? webScoketUtils;
+  WebSocketUtils? webSocketUtils;
 
   final heartbeatData = base64.decode("ABQdAAwsNgBM");
 
@@ -48,7 +48,7 @@ class HuyaDanmaku implements LiveDanmaku {
   @override
   Future start(dynamic args) async {
     danmakuArgs = args as HuyaDanmakuArgs;
-    webScoketUtils = WebScoketUtils(
+    webSocketUtils = WebSocketUtils(
       url: serverUrl,
       heartBeatTime: heartbeatTime,
       onMessage: (e) {
@@ -68,13 +68,13 @@ class HuyaDanmaku implements LiveDanmaku {
         onClose?.call("服务器连接失败$e");
       },
     );
-    webScoketUtils?.connect();
+    webSocketUtils?.connect();
   }
 
   void joinRoom() {
     var joinData =
         getJoinData(danmakuArgs.ayyuid, danmakuArgs.topSid, danmakuArgs.topSid);
-    webScoketUtils?.sendMessage(joinData);
+    webSocketUtils?.sendMessage(joinData);
   }
 
   List<int> getJoinData(int ayyuid, int tid, int sid) {
@@ -101,14 +101,14 @@ class HuyaDanmaku implements LiveDanmaku {
 
   @override
   void heartbeat() {
-    webScoketUtils?.sendMessage(heartbeatData);
+    webSocketUtils?.sendMessage(heartbeatData);
   }
 
   @override
   Future stop() async {
     onMessage = null;
     onClose = null;
-    webScoketUtils?.close();
+    webSocketUtils?.close();
   }
 
   void decodeMessage(List<int> data) {

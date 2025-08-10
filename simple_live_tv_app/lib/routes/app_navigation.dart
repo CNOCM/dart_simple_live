@@ -15,10 +15,10 @@ class AppNavigator {
   static void toLiveRoomDetail(
       {required Site site, required String roomId}) async {
     if (site.id == Constant.kBiliBili &&
-        !BiliBiliAccountService.instance.logined.value &&
+        !BiliBiliAccountService.instance.logged.value &&
         AppSettingsController.instance.bilibiliLoginTip.value) {
       await toBiliBiliLogin();
-      if (!BiliBiliAccountService.instance.logined.value) {
+      if (!BiliBiliAccountService.instance.logged.value) {
         SmartDialog.showToast("未完成登录");
         return;
       }

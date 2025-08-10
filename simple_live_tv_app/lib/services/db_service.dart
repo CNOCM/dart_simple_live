@@ -10,7 +10,7 @@ class DBService extends GetxService {
   late Box<FollowUser> followBox;
 
   Future init() async {
-    historyBox = await Hive.openBox("TVHostiry");
+    historyBox = await Hive.openBox("TVHistory");
     followBox = await Hive.openBox("TVFollowUser");
   }
 
@@ -41,7 +41,7 @@ class DBService extends GetxService {
     await historyBox.put(history.id, history);
   }
 
-  List<History> getHistores() {
+  List<History> getHistories() {
     var his = historyBox.values.toList();
     his.sort((a, b) => b.updateTime.compareTo(a.updateTime));
     return his;

@@ -6,7 +6,7 @@ import 'package:simple_live_app/modules/home/home_controller.dart';
 import 'package:simple_live_app/modules/home/home_list_view.dart';
 
 class HomePage extends GetView<HomeController> {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +29,7 @@ class HomePage extends GetView<HomeController> {
                       Image.asset(
                         e.logo,
                         width: 24,
+                        semanticLabel: '${e.name} logo',
                       ),
                       AppStyle.hGap8,
                       Text(e.name),

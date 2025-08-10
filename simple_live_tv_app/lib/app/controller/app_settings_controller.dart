@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:simple_live_tv_app/services/local_storage_service.dart';
 
 import 'package:get/get.dart';
@@ -168,6 +170,13 @@ class AppSettingsController extends GetxController {
     danmuStrokeWidth.value = e;
     LocalStorageService.instance
         .setValue(LocalStorageService.kDanmuStrokeWidth, e);
+  }
+
+  var danmuFontWeight = FontWeight.normal.index.obs;
+  void setDanmuFontWeight(int e) {
+    danmuFontWeight.value = e;
+    LocalStorageService.instance
+        .setValue(LocalStorageService.kDanmuFontWeight, e);
   }
 
   var qualityLevel = 1.obs;

@@ -8,10 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
-import 'package:ns_danmaku/ns_danmaku.dart';
+import 'package:canvas_danmaku/canvas_danmaku.dart';
+import 'package:simple_live_app/app/event_bus.dart';
 import 'package:volume_controller/volume_controller.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:simple_live_app/app/controller/app_settings_controller.dart';
@@ -35,6 +36,7 @@ mixin PlayerMixin {
           : MPVLogLevel.error,
     ),
   );
+
   /// 初始化播放器并设置 ao 参数
   Future<void> initializePlayer() async {
     // 设置音频输出驱动
@@ -71,7 +73,7 @@ mixin PlayerMixin {
 
 mixin PlayerStateMixin on PlayerMixin {
   ///音量控制条计时器
-  Timer? hidevolumeTimer;
+  Timer? hideVolumeTimer;
 
   /// 是否进入桌面端小窗
   RxBool smallWindowState = false.obs;
@@ -81,6 +83,9 @@ mixin PlayerStateMixin on PlayerMixin {
 
   /// 是否显示控制器
   RxBool showControlsState = false.obs;
+
+  /// 是否显示鼠标光标
+  RxBool showCursorState = false.obs;
 
   /// 是否显示设置窗口
   RxBool showSettingState = false.obs;
@@ -109,6 +114,9 @@ mixin PlayerStateMixin on PlayerMixin {
   /// 自动隐藏控制器计时器
   Timer? hideControlsTimer;
 
+  /// 自动隐藏鼠标光标计时器
+  Timer? hideCursorTimer;
+
   /// 自动隐藏提示计时器
   Timer? hideSeekTipTimer;
 
@@ -117,13 +125,19 @@ mixin PlayerStateMixin on PlayerMixin {
 
   Widget? danmakuView;
 
-  var showQualites = false.obs;
+  var showQualities = false.obs;
   var showLines = false.obs;
 
   /// 隐藏控制器
   void hideControls() {
     showControlsState.value = false;
     hideControlsTimer?.cancel();
+  }
+
+  /// 隐藏鼠标光标
+  void hideCursor() {
+    showCursorState.value = false;
+    hideCursorTimer?.cancel();
   }
 
   void setLockState() {
@@ -141,6 +155,12 @@ mixin PlayerStateMixin on PlayerMixin {
     resetHideControlsTimer();
   }
 
+  /// 显示鼠标光标
+  void showCursor() {
+    showCursorState.value = true;
+    resetHideCursorTimer();
+  }
+
   /// 开始隐藏控制器计时
   /// - 当点击控制器上时功能时需要重新计时
   void resetHideControlsTimer() {
@@ -151,6 +171,18 @@ mixin PlayerStateMixin on PlayerMixin {
         seconds: 5,
       ),
       hideControls,
+    );
+  }
+
+  /// 开始隐藏鼠标光标计时
+  void resetHideCursorTimer() {
+    hideCursorTimer?.cancel();
+
+    hideCursorTimer = Timer(
+      const Duration(
+        seconds: 5,
+      ),
+      hideCursor,
     );
   }
 
@@ -182,46 +214,36 @@ mixin PlayerStateMixin on PlayerMixin {
 }
 mixin PlayerDanmakuMixin on PlayerStateMixin {
   /// 弹幕控制器
-  DanmakuController? danmakuController;
+  late DanmakuController? danmakuController;
 
   void initDanmakuController(DanmakuController e) {
     danmakuController = e;
-    danmakuController?.updateOption(
-      DanmakuOption(
-        fontSize: AppSettingsController.instance.danmuSize.value,
-        area: AppSettingsController.instance.danmuArea.value,
-        duration: AppSettingsController.instance.danmuSpeed.value,
-        opacity: AppSettingsController.instance.danmuOpacity.value,
-        strokeWidth: AppSettingsController.instance.danmuStrokeWidth.value,
-        fontWeight: FontWeight
-            .values[AppSettingsController.instance.danmuFontWeight.value],
-      ),
-    );
   }
 
   void updateDanmuOption(DanmakuOption? option) {
-    if (danmakuController == null || option == null) return;
-    danmakuController!.updateOption(option);
+    if (option == null) return;
+    danmakuController?.updateOption(option);
   }
 
   void disposeDanmakuController() {
     danmakuController?.clear();
   }
 
-  void addDanmaku(List<DanmakuItem> items) {
+  void addDanmaku(List<DanmakuContentItem> items) {
     if (!showDanmakuState.value) {
       return;
     }
-    danmakuController?.addItems(items);
+    for (var item in items) {
+      danmakuController?.addDanmaku(item);
+    }
   }
 }
 mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
   final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-
+  final screenBrightness = ScreenBrightness();
+  final VolumeController volumeController = VolumeController.instance;
   final pip = Floating();
   StreamSubscription<PiPStatus>? _pipSubscription;
-
-  final VolumeController volumeController = VolumeController();
 
   /// 初始化一些系统状态
   void initSystem() async {
@@ -274,6 +296,8 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
         setLandscapeOrientation();
       }
     } else {
+      showCursor();
+      resetHideCursorTimer();
       windowManager.setFullScreen(true);
     }
     //danmakuController?.clear();
@@ -389,7 +413,7 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
       }
 
       if (Platform.isIOS || Platform.isAndroid) {
-        await ImageGallerySaver.saveImage(
+        await ImageGallerySaverPlus.saveImage(
           imageData,
         );
         SmartDialog.showToast("已保存截图至相册");
@@ -489,6 +513,9 @@ mixin PlayerGestureControlMixin
   void onHover(PointerHoverEvent event, BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final targetPosition = screenHeight * 0.25; // 计算屏幕顶部25%的位置
+
+    showCursor();
+
     if (event.position.dy <= targetPosition ||
         event.position.dy >= targetPosition * 3) {
       if (!showControlsState.value) {
@@ -666,6 +693,7 @@ class PlayerController extends BaseController
   StreamSubscription? _heightSubscription;
   StreamSubscription? _logSubscription;
   StreamSubscription? _playingSubscription;
+  StreamSubscription? _escSubscription;
 
   void initStream() {
     _errorSubscription = player.stream.error.listen((event) {
@@ -706,6 +734,10 @@ class PlayerController extends BaseController
       isVertical.value =
           (player.state.height ?? 9) > (player.state.width ?? 16);
     });
+    _escSubscription =
+        EventBus.instance.listen(EventBus.kEscapePressed, (event) {
+      exitFull();
+    });
   }
 
   void disposeStream() {
@@ -716,6 +748,7 @@ class PlayerController extends BaseController
     _logSubscription?.cancel();
     _pipSubscription?.cancel();
     _playingSubscription?.cancel();
+    _escSubscription?.cancel();
   }
 
   void mediaEnd() {
@@ -793,7 +826,7 @@ class PlayerController extends BaseController
             onTap: () {
               Clipboard.setData(
                 ClipboardData(
-                  text: "VideoTrack\n${player.state.track.audio}",
+                  text: "VideoTrack\n${player.state.track.video}",
                 ),
               );
             },

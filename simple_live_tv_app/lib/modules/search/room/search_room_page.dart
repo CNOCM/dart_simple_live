@@ -47,7 +47,7 @@ class SearchRoomPage extends GetView<SearchRoomController> {
               const Spacer(),
               Obx(
                 () => Visibility(
-                  visible: controller.loadding.value,
+                  visible: controller.loading.value,
                   child: SizedBox(
                     width: 48.w,
                     height: 48.w,
@@ -78,11 +78,7 @@ class SearchRoomPage extends GetView<SearchRoomController> {
                 .map(
                   (e) => Obx(
                     () => HighlightButton(
-                      icon: Image.asset(
-                        e.logo,
-                        width: 48.w,
-                        height: 48.w,
-                      ),
+                      icon: Image.asset(e.logo, width: 48.w, height: 48.w),
                       text: e.name,
                       selected: controller.siteId.value == e.id,
                       focusNode: AppFocusNode(),
@@ -135,7 +131,7 @@ class SearchRoomPage extends GetView<SearchRoomController> {
                   Obx(
                     () => Visibility(
                       visible: controller.list.isEmpty &&
-                          !controller.loadding.value &&
+                          !controller.loading.value &&
                           !controller.pageError.value,
                       child: AppEmptyWidget(
                         onRefresh: () {
@@ -147,7 +143,7 @@ class SearchRoomPage extends GetView<SearchRoomController> {
                   Obx(
                     () => Visibility(
                       visible: controller.pageError.value &&
-                          !controller.loadding.value,
+                          !controller.loading.value,
                       child: AppErrorWidget(
                         errorMsg: controller.errorMsg.value,
                       ),

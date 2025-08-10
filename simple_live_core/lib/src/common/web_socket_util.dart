@@ -8,7 +8,7 @@ enum SocketStatus {
   closed,
 }
 
-class WebScoketUtils {
+class WebSocketUtils {
   SocketStatus status = SocketStatus.closed;
 
   /// 链接
@@ -37,7 +37,7 @@ class WebScoketUtils {
 
   /// 请求头
   Map<String, dynamic>? headers;
-  WebScoketUtils({
+  WebSocketUtils({
     required this.url,
     required this.heartBeatTime,
     this.onMessage,

@@ -45,7 +45,7 @@ class CategoryDetailPage extends GetView<CategoryDetailController> {
               const Spacer(),
               Obx(
                 () => Visibility(
-                  visible: controller.loadding.value,
+                  visible: controller.loading.value,
                   child: SizedBox(
                     width: 48.w,
                     height: 48.w,

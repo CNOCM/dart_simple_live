@@ -42,10 +42,13 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+/android/app/.cxx
+
+/windows/out
+/windows/.vs
 
 /ios/Podfile.lock
 pubspec.lock
 
 .fvm/
-
-/android/app/.cxx
+.fvmrc

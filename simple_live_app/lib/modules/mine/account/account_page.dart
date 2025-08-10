@@ -5,7 +5,7 @@ import 'package:simple_live_app/modules/mine/account/account_controller.dart';
 import 'package:simple_live_app/services/bilibili_account_service.dart';
 
 class AccountPage extends GetView<AccountController> {
-  const AccountPage({Key? key}) : super(key: key);
+  const AccountPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +31,7 @@ class AccountPage extends GetView<AccountController> {
               ),
               title: const Text("哔哩哔哩"),
               subtitle: Text(BiliBiliAccountService.instance.name.value),
-              trailing: BiliBiliAccountService.instance.logined.value
+              trailing: BiliBiliAccountService.instance.logged.value
                   ? const Icon(Icons.logout)
                   : const Icon(Icons.chevron_right),
               onTap: controller.bilibiliTap,

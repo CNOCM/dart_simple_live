@@ -27,7 +27,7 @@ class AppNavigator {
   static void toLiveRoomDetail(
       {required Site site, required String roomId}) async {
     if (site.id == Constant.kBiliBili &&
-        !BiliBiliAccountService.instance.logined.value &&
+        !BiliBiliAccountService.instance.logged.value &&
         AppSettingsController.instance.bilibiliLoginTip.value) {
       var result = await Utils.showAlertDialog(
         "哔哩哔哩需要登录才能观看高清直播，是否前往登录？",
@@ -44,7 +44,7 @@ class AppNavigator {
       );
       if (result == true) {
         await toBiliBiliLogin();
-        if (!BiliBiliAccountService.instance.logined.value) {
+        if (!BiliBiliAccountService.instance.logged.value) {
           SmartDialog.showToast("未完成登录");
         }
       }
@@ -66,7 +66,7 @@ class AppNavigator {
 
   /// 跳转至同步设备
   static Future toSyncDevice(
-      SyncClinet client, SyncClientInfoModel info) async {
+      SyncClient client, SyncClientInfoModel info) async {
     await Get.toNamed(
       RoutePath.kLocalSyncDevice,
       arguments: {

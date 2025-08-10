@@ -3,7 +3,7 @@ import 'package:simple_live_app/requests/http_client.dart';
 import 'package:simple_live_app/services/sync_service.dart';
 
 class SyncClientRequest {
-  Future<SyncClientInfoModel> getClientInfo(SyncClinet client) async {
+  Future<SyncClientInfoModel> getClientInfo(SyncClient client) async {
     var url = "http://${client.address}:${client.port}/info";
     var data = await HttpClient.instance.getJson(url);
 
@@ -11,7 +11,7 @@ class SyncClientRequest {
   }
 
   Future<bool> syncFollow(
-    SyncClinet client,
+    SyncClient client,
     dynamic body, {
     bool overlay = false,
   }) async {
@@ -32,10 +32,10 @@ class SyncClientRequest {
   }
 
   Future<bool> syncTag(
-      SyncClinet client,
-      dynamic body, {
-        bool overlay = false,
-      }) async {
+    SyncClient client,
+    dynamic body, {
+    bool overlay = false,
+  }) async {
     var url = "http://${client.address}:${client.port}/sync/tag";
     var data = await HttpClient.instance.postJson(
       url,
@@ -53,7 +53,7 @@ class SyncClientRequest {
   }
 
   Future<bool> syncHistory(
-    SyncClinet client,
+    SyncClient client,
     dynamic body, {
     bool overlay = false,
   }) async {
@@ -74,7 +74,7 @@ class SyncClientRequest {
   }
 
   Future<bool> syncBlockedWord(
-    SyncClinet client,
+    SyncClient client,
     dynamic body, {
     bool overlay = false,
   }) async {
@@ -94,7 +94,7 @@ class SyncClientRequest {
     }
   }
 
-  Future<bool> syncBiliAccount(SyncClinet client, String cookie) async {
+  Future<bool> syncBiliAccount(SyncClient client, String cookie) async {
     var url = "http://${client.address}:${client.port}/sync/account/bilibili";
     var data = await HttpClient.instance.postJson(
       url,

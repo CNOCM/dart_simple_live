@@ -30,10 +30,7 @@ class HomePage extends GetView<HomeController> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               AppStyle.hGap48,
-              Text(
-                "Simple Live TV",
-                style: AppStyle.titleStyleWhite,
-              ),
+              Text("Simple Live TV", style: AppStyle.titleStyleWhite),
               AppStyle.hGap24,
               const Spacer(),
               Obx(
@@ -141,10 +138,7 @@ class HomePage extends GetView<HomeController> {
                       ),
                       AppStyle.hGap24,
                       Expanded(
-                        child: Text(
-                          "我的关注",
-                          style: AppStyle.titleStyleWhite,
-                        ),
+                        child: Text("我的关注", style: AppStyle.titleStyleWhite),
                       ),
                       Obx(
                         () => Visibility(
@@ -160,10 +154,7 @@ class HomePage extends GetView<HomeController> {
                                 ),
                               ),
                               AppStyle.hGap16,
-                              Text(
-                                "更新状态中...",
-                                style: AppStyle.textStyleWhite,
-                              ),
+                              Text("更新状态中...", style: AppStyle.textStyleWhite),
                             ],
                           ),
                         ),
@@ -241,7 +232,7 @@ class HomePage extends GetView<HomeController> {
                       ],
                     ),
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -292,7 +283,7 @@ class HomePage extends GetView<HomeController> {
                     padding: AppStyle.edgeInsetsA40,
                     itemBuilder: (_, i) {
                       var item = FollowUserService.instance.list[i];
-                      var foucsNode = AppFocusNode();
+                      var focusNode = AppFocusNode();
                       return HighlightListTile(
                         autofocus: i == 0,
                         leading: NetImage(
@@ -302,19 +293,21 @@ class HomePage extends GetView<HomeController> {
                           borderRadius: 64.w,
                         ),
                         title: item.userName,
-                        focusNode: foucsNode,
+                        focusNode: focusNode,
                         trailing: Obx(
                           () => Icon(
                             Icons.delete_outline_outlined,
                             size: 40.w,
-                            color: foucsNode.isFoucsed.value
+                            color: focusNode.isFocused.value
                                 ? Colors.black
                                 : Colors.white,
                           ),
                         ),
                         onTap: () {
-                          FollowUserService.instance
-                              .removeItem(item, refresh: false);
+                          FollowUserService.instance.removeItem(
+                            item,
+                            refresh: false,
+                          );
                         },
                       );
                     },
@@ -323,9 +316,7 @@ class HomePage extends GetView<HomeController> {
                 Obx(
                   () => Visibility(
                     visible: FollowUserService.instance.list.isEmpty,
-                    child: const AppEmptyWidget(
-                      text: "关注列表为空，快去关注一些主播吧",
-                    ),
+                    child: const AppEmptyWidget(text: "关注列表为空，快去关注一些主播吧"),
                   ),
                 ),
               ],
@@ -339,16 +330,14 @@ class HomePage extends GetView<HomeController> {
   void showSearchDialog() {
     var textController = TextEditingController();
     var mode = 0.obs;
-    var roomFocusNode = AppFocusNode()..isFoucsed.value = true;
+    var roomFocusNode = AppFocusNode()..isFocused.value = true;
     var anchorFocusNode = AppFocusNode();
     showDialog(
       context: Get.context!,
       builder: (_) => AlertDialog(
         backgroundColor: Get.theme.cardColor,
         surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(
-          borderRadius: AppStyle.radius16,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: AppStyle.radius16),
         contentPadding: AppStyle.edgeInsetsA48,
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -362,7 +351,7 @@ class HomePage extends GetView<HomeController> {
                     iconData: Icons.live_tv,
                     selected: mode.value == 0,
                     focusNode: roomFocusNode,
-                    autofocus: roomFocusNode.isFoucsed.value,
+                    autofocus: roomFocusNode.isFocused.value,
                     onTap: () {
                       mode.value = 0;
                     },
@@ -375,7 +364,7 @@ class HomePage extends GetView<HomeController> {
                     selected: mode.value == 1,
                     iconData: Icons.person,
                     focusNode: anchorFocusNode,
-                    autofocus: anchorFocusNode.isFoucsed.value,
+                    autofocus: anchorFocusNode.isFocused.value,
                     onTap: () {
                       mode.value = 1;
                     },

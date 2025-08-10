@@ -43,6 +43,7 @@ import 'package:simple_live_app/modules/settings/indexed_settings/indexed_settin
 import 'package:simple_live_app/modules/settings/other/other_settings_controller.dart';
 import 'package:simple_live_app/modules/settings/other/other_settings_page.dart';
 import 'package:simple_live_app/modules/settings/play_settings_page.dart';
+import 'package:simple_live_app/modules/test/test_page.dart';
 
 import '../modules/indexed/indexed_page.dart';
 import 'route_path.dart';
@@ -194,7 +195,7 @@ class AppPages {
       name: RoutePath.kSyncScan,
       page: () => const SyncScanQRPage(),
       bindings: [
-        BindingsBuilder.put(() => SyncScanQRControlelr()),
+        BindingsBuilder.put(() => SyncScanQRController()),
       ],
     ),
     //同步设备
@@ -226,7 +227,7 @@ class AppPages {
       page: () => const RemoteSyncWebDAVPage(),
       bindings: [
         BindingsBuilder.put(
-              () => RemoteSyncWebDAVController(),
+          () => RemoteSyncWebDAVController(),
         ),
       ],
     ),
@@ -247,6 +248,11 @@ class AppPages {
     GetPage(
       name: RoutePath.kSettingsFollow,
       page: () => const FollowSettingsPage(),
+    ),
+    //测试设置
+    GetPage(
+      name: RoutePath.kTest,
+      page: () => const TestPage(),
     ),
   ];
 }

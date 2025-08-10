@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 import 'package:simple_live_app/modules/sync/local_sync/scan_qr/sync_scan_qr_controller.dart';
 
-class SyncScanQRPage extends GetView<SyncScanQRControlelr> {
+class SyncScanQRPage extends GetView<SyncScanQRController> {
   const SyncScanQRPage({super.key});
 
   @override

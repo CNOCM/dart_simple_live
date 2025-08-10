@@ -51,7 +51,7 @@ class LocalSyncController extends BaseController {
       address = parts.first;
     }
 
-    var client = SyncClinet(
+    var client = SyncClient(
       id: 'manual',
       address: address,
       port: SyncService.httpPort,
@@ -61,7 +61,7 @@ class LocalSyncController extends BaseController {
     connectClient(client);
   }
 
-  void connectClient(SyncClinet client) async {
+  void connectClient(SyncClient client) async {
     try {
       SmartDialog.showLoading(msg: "连接中...");
       var info = await request.getClientInfo(client);

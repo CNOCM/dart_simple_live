@@ -30,7 +30,7 @@ class HighlightListTile extends StatelessWidget {
     return Obx(
       () => IconTheme(
         data: IconThemeData(
-          color: focusNode.isFoucsed.value ? Colors.black : Colors.white,
+          color: focusNode.isFocused.value ? Colors.black : Colors.white,
         ),
         child: HighlightWidget(
           onTap: onTap,
@@ -50,30 +50,31 @@ class HighlightListTile extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: focusNode.isFoucsed.value
+                        style: focusNode.isFocused.value
                             ? AppStyle.textStyleBlack
                             : AppStyle.textStyleWhite,
                       ),
                       if (subtitle != null)
                         Text(
                           subtitle!,
-                          style: focusNode.isFoucsed.value
+                          style: focusNode.isFocused.value
                               ? AppStyle.textStyleBlack.copyWith(fontSize: 24.w)
-                              : AppStyle.textStyleWhite
-                                  .copyWith(fontSize: 24.w),
+                              : AppStyle.textStyleWhite.copyWith(
+                                  fontSize: 24.w,
+                                ),
                         ),
                     ],
                   ),
                 ),
                 AppStyle.hGap12,
                 if (onTap != null &&
-                    focusNode.isFoucsed.value &&
+                    focusNode.isFocused.value &&
                     trailing == null)
                   Icon(
                     Icons.chevron_right,
                     size: 40.w,
                     color:
-                        focusNode.isFoucsed.value ? Colors.black : Colors.white,
+                        focusNode.isFocused.value ? Colors.black : Colors.white,
                   ),
                 if (trailing != null) trailing!,
               ],

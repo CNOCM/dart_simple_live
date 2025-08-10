@@ -26,7 +26,7 @@ import 'package:simple_live_app/widgets/superchat_card.dart';
 import 'package:simple_live_core/simple_live_core.dart';
 
 class LiveRoomPage extends GetView<LiveRoomController> {
-  const LiveRoomPage({Key? key}) : super(key: key);
+  const LiveRoomPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -89,8 +89,8 @@ class LiveRoomPage extends GetView<LiveRoomController> {
         if (controller.fullScreenState.value) {
           return PopScope(
             canPop: false,
-            onPopInvoked: (e) {
-              controller.exitFull();
+            onPopInvokedWithResult: (didPop, result) async {
+              if (didPop) return;
             },
             child: Scaffold(
               body: buildMediaPlayer(),
@@ -215,25 +215,39 @@ class LiveRoomPage extends GetView<LiveRoomController> {
                 icon: const Icon(Remix.share_line),
                 label: const Text("分享"),
               ),
-              TextButton.icon(
-                style: TextButton.styleFrom(
-                  textStyle: const TextStyle(fontSize: 14),
-                ),
-                onPressed: controller.copyUrl,
-                icon: const Icon(Remix.file_copy_line),
-                label: const Text("复制链接"),
-              ),
-              TextButton.icon(
-                style: TextButton.styleFrom(
-                  textStyle: const TextStyle(fontSize: 14),
-                ),
-                onPressed: controller.copyPlayUrl,
-                icon: const Icon(Remix.file_copy_line),
-                label: const Text("复制播放直链"),
-              ),
+              (Platform.isWindows || Platform.isLinux)
+                  ? TextButton.icon(
+                      style: TextButton.styleFrom(
+                        textStyle: const TextStyle(fontSize: 14),
+                      ),
+                      onPressed: controller.visitWebLive,
+                      icon: const Icon(Remix.chrome_fill),
+                      label: const Text("浏览器打开"),
+                    )
+                  : Column(
+                      children: [
+                        TextButton.icon(
+                          style: TextButton.styleFrom(
+                            textStyle: const TextStyle(fontSize: 14),
+                          ),
+                          onPressed: controller.copyUrl,
+                          icon: const Icon(Remix.file_copy_line),
+                          label: const Text("复制链接"),
+                        ),
+                        TextButton.icon(
+                          style: TextButton.styleFrom(
+                            textStyle: const TextStyle(fontSize: 14),
+                          ),
+                          onPressed: controller.copyPlayUrl,
+                          icon: const Icon(Remix.file_copy_line),
+                          label: const Text("复制播放直链"),
+                        ),
+                      ],
+                    )
             ],
           ),
         ),
+        //buildBottomActions(context),
       ],
     );
   }
@@ -521,7 +535,7 @@ class LiveRoomPage extends GetView<LiveRoomController> {
   Widget buildMessageItem(LiveMessage message) {
     if (message.userName == "LiveSysMessage") {
       return Obx(
-        () => Text(
+        () => SelectableText(
           message.message,
           style: TextStyle(
             color: Colors.grey,
@@ -529,6 +543,59 @@ class LiveRoomPage extends GetView<LiveRoomController> {
           ),
         ),
       );
+    }
+
+    final parts = <InlineSpan>[];
+    final text = message.message;
+    final regex = RegExp(r'\[[^\[\]]+\]');
+    final matches = regex.allMatches(text);
+    int lastIndex = 0;
+    int imageIndex = 0;
+
+    for (final match in matches) {
+      if (match.start > lastIndex) {
+        parts.add(TextSpan(
+          text: text.substring(lastIndex, match.start),
+          style: TextStyle(
+            color: Get.isDarkMode ? Colors.white : AppColors.black333,
+          ),
+        ));
+      }
+      if (imageIndex < (message.imageUrls?.length ?? 0)) {
+        final imageUrl = message.imageUrls![imageIndex++];
+        parts.add(WidgetSpan(
+          alignment: PlaceholderAlignment.middle,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2),
+            child: Image.network(
+              imageUrl,
+              width: 20,
+              height: 20,
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) =>
+                  const Icon(Icons.broken_image, size: 20),
+            ),
+          ),
+        ));
+      } else {
+        parts.add(TextSpan(
+          text: match.group(0),
+          style: TextStyle(
+            color: Get.isDarkMode ? Colors.white : AppColors.black333,
+          ),
+        ));
+      }
+
+      lastIndex = match.end;
+    }
+
+    if (lastIndex < text.length) {
+      parts.add(TextSpan(
+        text: text.substring(lastIndex),
+        style: TextStyle(
+          color: Get.isDarkMode ? Colors.white : AppColors.black333,
+        ),
+      ));
     }
 
     return Obx(
@@ -550,7 +617,7 @@ class LiveRoomPage extends GetView<LiveRoomController> {
                     ),
                     padding:
                         AppStyle.edgeInsetsA4.copyWith(left: 12, right: 12),
-                    child: Text.rich(
+                    child: SelectableText.rich(
                       TextSpan(
                         text: "${message.userName}：",
                         style: TextStyle(
@@ -558,37 +625,21 @@ class LiveRoomPage extends GetView<LiveRoomController> {
                           fontSize:
                               AppSettingsController.instance.chatTextSize.value,
                         ),
-                        children: [
-                          TextSpan(
-                            text: message.message,
-                            style: TextStyle(
-                              color: Get.isDarkMode
-                                  ? Colors.white
-                                  : AppColors.black333,
-                            ),
-                          )
-                        ],
+                        children: parts,
                       ),
                     ),
                   ),
                 ),
               ],
             )
-          : Text.rich(
+          : SelectableText.rich(
               TextSpan(
                 text: "${message.userName}：",
                 style: TextStyle(
                   color: Colors.grey,
                   fontSize: AppSettingsController.instance.chatTextSize.value,
                 ),
-                children: [
-                  TextSpan(
-                    text: message.message,
-                    style: TextStyle(
-                      color: Get.isDarkMode ? Colors.white : AppColors.black333,
-                    ),
-                  )
-                ],
+                children: parts,
               ),
             ),
     );
@@ -871,7 +922,7 @@ class LiveRoomPage extends GetView<LiveRoomController> {
               trailing: const Icon(Icons.chevron_right),
               onTap: () {
                 Get.back();
-                controller.openNaviteAPP();
+                controller.openNativeAPP();
               },
             ),
             ListTile(

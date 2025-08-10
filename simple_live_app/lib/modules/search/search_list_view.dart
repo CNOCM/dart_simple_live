@@ -12,7 +12,7 @@ import 'package:simple_live_core/simple_live_core.dart';
 
 class SearchListView extends StatelessWidget {
   final String tag;
-  const SearchListView(this.tag, {Key? key}) : super(key: key);
+  const SearchListView(this.tag, {super.key});
   SearchListController get controller =>
       Get.find<SearchListController>(tag: tag);
   @override
@@ -32,7 +32,7 @@ class SearchListView extends StatelessWidget {
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
                 crossAxisCount: roomRowCount,
-                showPageLoadding: true,
+                showPageLoading: true,
                 itemBuilder: (_, i) {
                   var item = controller.list[i] as LiveRoomItem;
                   return LiveRoomCard(controller.site, item);

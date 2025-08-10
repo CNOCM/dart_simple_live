@@ -47,16 +47,16 @@ class ParseController extends GetxController {
     try {
       SmartDialog.showLoading(msg: "");
       var detail = await site.liveSite.getRoomDetail(roomId: parseResult.first);
-      var qualites = await site.liveSite.getPlayQualites(detail: detail);
+      var qualities = await site.liveSite.getPlayQualities(detail: detail);
       SmartDialog.dismiss(status: SmartStatus.loading);
-      if (qualites.isEmpty) {
+      if (qualities.isEmpty) {
         SmartDialog.showToast("读取直链失败,无法读取清晰度");
 
         return;
       }
       var result = await Get.dialog(SimpleDialog(
         title: const Text("选择清晰度"),
-        children: qualites
+        children: qualities
             .map(
               (e) => ListTile(
                 title: Text(
@@ -125,7 +125,7 @@ class ParseController extends GetxController {
     if (url.contains("douyu.com")) {
       var regExp = RegExp(r"douyu\.com/([\d|\w]+)");
       // 适配 topic_url
-      if(url.contains("topic")){
+      if (url.contains("topic")) {
         regExp = RegExp(r"[?&]rid=([\d]+)");
       }
       id = regExp.firstMatch(url)?.group(1) ?? "";
