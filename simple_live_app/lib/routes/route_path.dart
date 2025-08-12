@@ -36,6 +36,9 @@ class RoutePath {
   /// 我的关注
   static const kFollowUser = "/user/follow";
 
+  /// 关注用户-信息详情
+  static const kFollowInfo = "/user/follow/info";
+
   /// 工具箱
   static const kTools = "/other/tools";
 

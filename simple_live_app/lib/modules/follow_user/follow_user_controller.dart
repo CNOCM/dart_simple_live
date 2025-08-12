@@ -117,14 +117,7 @@ class FollowUserController extends BasePageController<FollowUser> {
   }
 
   void setItemTag(FollowUser item, FollowUserTag targetTag) {
-    FollowUserTag tarTag = targetTag;
-    FollowUserTag curTag = tagList.firstWhere((tag) => tag.tag == item.tag);
-    curTag.userId.remove(item.id);
-    tarTag.userId.addIf(!tarTag.userId.contains(item.id), item.id);
-    item.tag = tarTag.tag;
-    updateTag(curTag);
-    updateTag(tarTag);
-    updateItem(item);
+    FollowService.instance.setItemTag(item, targetTag);
     filterData();
   }
 

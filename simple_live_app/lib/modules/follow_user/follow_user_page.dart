@@ -167,7 +167,32 @@ class FollowUserPage extends GetView<FollowUserController> {
                         site: site, roomId: item.roomId);
                   },
                   onLongPress: () {
-                    setFollowTagDialog(item);
+                    // 长按弹出操作：设置标签或查看详情
+                    Get.bottomSheet(
+                      SafeArea(
+                        child: Wrap(
+                          children: [
+                            ListTile(
+                              leading: const Icon(Remix.price_tag_3_line),
+                              title: const Text('设置标签'),
+                              onTap: () {
+                                Get.back();
+                                setFollowTagDialog(item);
+                              },
+                            ),
+                            ListTile(
+                              leading: const Icon(Remix.information_line),
+                              title: const Text('查看详情'),
+                              onTap: () {
+                                Get.back();
+                                AppNavigator.toFollowInfo(item);
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      backgroundColor: Theme.of(context).cardColor,
+                    );
                   },
                 );
               },

@@ -44,6 +44,8 @@ import 'package:simple_live_app/modules/settings/other/other_settings_controller
 import 'package:simple_live_app/modules/settings/other/other_settings_page.dart';
 import 'package:simple_live_app/modules/settings/play_settings_page.dart';
 import 'package:simple_live_app/modules/test/test_page.dart';
+import 'package:simple_live_app/modules/follow_user/follow_info_setting/follow_info_controller.dart';
+import 'package:simple_live_app/modules/follow_user/follow_info_setting/follow_info_page.dart';
 
 import '../modules/indexed/indexed_page.dart';
 import 'route_path.dart';
@@ -253,6 +255,14 @@ class AppPages {
     GetPage(
       name: RoutePath.kTest,
       page: () => const TestPage(),
+    ),
+    // 关注用户-信息详情
+    GetPage(
+      name: RoutePath.kFollowInfo,
+      page: () => const FollowInfoPage(),
+      bindings: [
+        BindingsBuilder.put(() => FollowInfoController()),
+      ],
     ),
   ];
 }

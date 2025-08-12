@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter_js/flutter_js.dart';
+import 'package:html_unescape/html_unescape.dart';
 import 'package:simple_live_core/simple_live_core.dart';
 import 'package:simple_live_core/src/common/http_client.dart';
 import 'package:simple_live_core/src/common/js_engine.dart';
@@ -379,6 +380,8 @@ class DouyuSite implements LiveSite {
     } catch (e) {
       CoreLog.error(e);
       return "";
+    } finally {
+      JsEngine.dispose();
     }
     // 自部署：https://github.com/SlotSun/simple_live_api
   }

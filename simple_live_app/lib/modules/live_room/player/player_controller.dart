@@ -286,31 +286,45 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
   }
 
   /// 进入全屏
-  void enterFullScreen() {
+  void enterFullScreen() async {
     fullScreenState.value = true;
     if (Platform.isAndroid || Platform.isIOS) {
       //全屏
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+          overlays: []);
+
       if (!isVertical.value) {
         //横屏
-        setLandscapeOrientation();
+        await setLandscapeOrientation();
       }
     } else {
       showCursor();
       resetHideCursorTimer();
-      windowManager.setFullScreen(true);
+      bool isMaximized = await windowManager.isMaximized();
+      if (isMaximized) {
+        await windowManager.setFullScreen(true);
+        await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
+      }
+      await windowManager.setFullScreen(true);
     }
     //danmakuController?.clear();
   }
 
   /// 退出全屏
-  void exitFull() {
+  void exitFull() async {
     if (Platform.isAndroid || Platform.isIOS) {
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge,
-          overlays: SystemUiOverlay.values);
-      setPortraitOrientation();
+      await SystemChrome.setEnabledSystemUIMode(
+        SystemUiMode.edgeToEdge,
+        overlays: SystemUiOverlay.values,
+      );
+      await setPortraitOrientation();
     } else {
-      windowManager.setFullScreen(false);
+      bool isMaximized = await windowManager.isMaximized();
+      if (isMaximized) {
+        await windowManager.setFullScreen(false);
+        await windowManager.setTitleBarStyle(TitleBarStyle.normal);
+      }
+      await windowManager.setFullScreen(false);
     }
     fullScreenState.value = false;
 
