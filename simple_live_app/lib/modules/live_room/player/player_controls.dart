@@ -280,16 +280,20 @@ Widget buildFullControls(
                       color: Colors.white,
                     ),
                   ),
-                  Obx(
-                    () => Padding(
+                  Obx(() {
+                    final showTime = controller.detail.value?.showTime;
+                    if (showTime == null || showTime.isEmpty) {
+                      return const SizedBox.shrink();
+                    }
+                    return Padding(
                       padding: const EdgeInsets.only(left: 8.0),
                       child: Text(
                         controller.liveDuration.value,
                         style:
                             const TextStyle(fontSize: 14, color: Colors.white),
                       ),
-                    ),
-                  ),
+                    );
+                  }),
                   const Expanded(child: Center()),
                   Visibility(
                     visible: !Platform.isAndroid && !Platform.isIOS,
