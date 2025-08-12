@@ -23,19 +23,29 @@ Widget playerControls(
   VideoState videoState,
   LiveRoomController controller,
 ) {
-  return Obx(() {
-    if (controller.fullScreenState.value) {
-      return buildFullControls(
-        videoState,
-        controller,
-      );
-    }
-    return buildControls(
-      videoState.context.orientation == Orientation.portrait,
-      videoState,
-      controller,
-    );
-  });
+  return Stack(
+    children: [
+      Obx(() {
+        if (controller.fullScreenState.value) {
+          return buildFullControls(
+            videoState,
+            controller,
+          );
+        }
+        return buildControls(
+          videoState.context.orientation == Orientation.portrait,
+          videoState,
+          controller,
+        );
+      }),
+      buildDanmuView(videoState, controller),
+      Positioned(
+        left: 24,
+        bottom: 24,
+        child: PlayerSuperChatOverlay(controller: controller),
+      ),
+    ],
+  );
 }
 
 Widget buildFullControls(
@@ -48,18 +58,6 @@ Widget buildFullControls(
     child: Stack(
       children: [
         Container(),
-        buildDanmuView(videoState, controller),
-
-        // 左下角SC显示
-        Visibility(
-          visible: (!Platform.isAndroid && !Platform.isIOS) ||
-              controller.fullScreenState.value,
-          child: Positioned(
-            left: 24,
-            bottom: 24,
-            child: PlayerSuperChatOverlay(controller: controller),
-          ),
-        ),
 
         Center(
           child: // 中间
@@ -431,18 +429,6 @@ Widget buildControls(
   return Stack(
     children: [
       Container(),
-      buildDanmuView(videoState, controller),
-
-      // 左下角SC显示
-      Visibility(
-        visible: (!Platform.isAndroid && !Platform.isIOS) ||
-            controller.fullScreenState.value,
-        child: Positioned(
-          left: 24,
-          bottom: 24,
-          child: PlayerSuperChatOverlay(controller: controller),
-        ),
-      ),
 
       // 中间
       Center(
@@ -544,15 +530,19 @@ Widget buildControls(
                     color: Colors.white,
                   ),
                 ),
-                Obx(
-                  () => Padding(
+                Obx(() {
+                  final showTime = controller.detail.value?.showTime;
+                  if (showTime == null || showTime.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+                  return Padding(
                     padding: const EdgeInsets.only(left: 8.0),
                     child: Text(
                       controller.liveDuration.value,
                       style: const TextStyle(fontSize: 14, color: Colors.white),
                     ),
-                  ),
-                ),
+                  );
+                }),
                 const Expanded(child: Center()),
                 Visibility(
                   visible: !Platform.isAndroid && !Platform.isIOS,
@@ -961,7 +951,7 @@ class _PlayerSuperChatCardState extends State<PlayerSuperChatCard> {
       opacity: 0.65,
       child: SuperChatCard(
         widget.message,
-        onExpire: () {},
+        onExpire: widget.onExpire,
         customCountdown: countdown,
       ),
     );
