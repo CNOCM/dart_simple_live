@@ -189,8 +189,8 @@ Widget buildFullControls(
                       onPressed: () {
                         controller.enablePIP();
                       },
-                      icon: const Icon(
-                        Icons.picture_in_picture,
+                      icon: const ImageIcon(
+                        AssetImage('assets/icons/icon_scalewindow.png'),
                         color: Colors.white,
                         size: 24,
                       ),
@@ -243,8 +243,8 @@ Widget buildFullControls(
                     onPressed: () {
                       controller.refreshRoom();
                     },
-                    icon: const Icon(
-                      Remix.refresh_line,
+                    icon: const ImageIcon(
+                      AssetImage('assets/icons/icon_refresh.png'),
                       color: Colors.white,
                     ),
                   ),
@@ -277,7 +277,7 @@ Widget buildFullControls(
                       showDanmakuSettings(controller);
                     },
                     icon: const ImageIcon(
-                      AssetImage('assets/icons/icon_danmaku_setting.png'),
+                      AssetImage('assets/icons/icon_danmaku_setting2.png'),
                       size: 24,
                       color: Colors.white,
                     ),
@@ -301,8 +301,8 @@ Widget buildFullControls(
                         controller
                             .showVolumeSlider(volumeButtonkey.currentContext!);
                       },
-                      icon: const Icon(
-                        Icons.volume_down,
+                      icon: const ImageIcon(
+                        AssetImage('assets/icons/icon_volume.png'),
                         size: 24,
                         color: Colors.white,
                       ),
@@ -337,8 +337,8 @@ Widget buildFullControls(
                         controller.exitFull();
                       }
                     },
-                    icon: const Icon(
-                      Remix.fullscreen_exit_fill,
+                    icon: const ImageIcon(
+                      AssetImage('assets/icons/icon_fullscreen.png'),
                       color: Colors.white,
                     ),
                   ),
@@ -505,8 +505,8 @@ Widget buildControls(
                   onPressed: () {
                     controller.refreshRoom();
                   },
-                  icon: const Icon(
-                    Remix.refresh_line,
+                  icon: const ImageIcon(
+                    AssetImage('assets/icons/icon_refresh.png'),
                     color: Colors.white,
                   ),
                 ),
@@ -539,7 +539,7 @@ Widget buildControls(
                     controller.showDanmuSettingsSheet();
                   },
                   icon: const ImageIcon(
-                    AssetImage('assets/icons/icon_danmaku_setting.png'),
+                    AssetImage('assets/icons/icon_danmaku_setting2.png'),
                     size: 24,
                     color: Colors.white,
                   ),
@@ -563,8 +563,8 @@ Widget buildControls(
                         volumeButtonkey.currentContext!,
                       );
                     },
-                    icon: const Icon(
-                      Icons.volume_down,
+                    icon: const ImageIcon(
+                      AssetImage('assets/icons/icon_volume.png'),
                       size: 24,
                       color: Colors.white,
                     ),
@@ -603,8 +603,8 @@ Widget buildControls(
                     onPressed: () {
                       controller.enterSmallWindow();
                     },
-                    icon: const Icon(
-                      Icons.picture_in_picture,
+                    icon: const ImageIcon(
+                      AssetImage('assets/icons/icon_scalewindow.png'),
                       color: Colors.white,
                       size: 24,
                     ),
@@ -614,8 +614,8 @@ Widget buildControls(
                   onPressed: () {
                     controller.enterFullScreen();
                   },
-                  icon: const Icon(
-                    Remix.fullscreen_line,
+                  icon: const ImageIcon(
+                    AssetImage('assets/icons/icon_fullscreen.png'),
                     color: Colors.white,
                   ),
                 ),
