@@ -114,6 +114,7 @@ class BiliBiliSite implements LiveSite {
         roomId: item["roomid"].toString(),
         title: item["title"].toString(),
         cover: "${item["cover"]}@400w.jpg",
+        areaName: item["area_name"].toString(),
         userName: item["uname"].toString(),
         online: int.tryParse(item["online"].toString()) ?? 0,
       );
@@ -226,6 +227,7 @@ class BiliBiliSite implements LiveSite {
         roomId: item["roomid"].toString(),
         title: item["title"].toString(),
         cover: "${item["cover"]}@400w.jpg",
+        areaName: item["area_name"].toString(),
         userName: item["uname"].toString(),
         online: int.tryParse(item["online"].toString()) ?? 0,
       );
@@ -329,12 +331,15 @@ class BiliBiliSite implements LiveSite {
     var items = <LiveRoomItem>[];
     for (var item in result["data"]["result"]["live_room"] ?? []) {
       var title = item["title"].toString();
-      //移除title中的<em></em>标签
+      var areaName = item["cate_name"].toString();
+      //移除title,areaName中的<em></em>标签
       title = title.replaceAll(RegExp(r"<.*?em.*?>"), "");
+      areaName = areaName.replaceAll(RegExp(r"<.*?em.*?>"), "");
       var roomItem = LiveRoomItem(
         roomId: item["roomid"].toString(),
         title: title,
         cover: "https:${item["cover"]}@400w.jpg",
+        areaName: areaName,
         userName: item["uname"].toString(),
         online: int.tryParse(item["online"].toString()) ?? 0,
       );

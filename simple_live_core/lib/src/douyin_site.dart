@@ -163,6 +163,7 @@ class DouyinSite implements LiveSite {
         roomId: item["web_rid"],
         title: item["room"]["title"].toString(),
         cover: item["room"]["cover"]["url_list"][0].toString(),
+        areaName: item["tag_name"].toString(),
         userName: item["room"]["owner"]["nickname"].toString(),
         online: int.tryParse(
                 item["room"]["room_view_stats"]["display_value"].toString()) ??
@@ -197,10 +198,11 @@ class DouyinSite implements LiveSite {
         roomId: item["owner"]["web_rid"],
         title: item["title"].toString(),
         cover: item["cover"]["url_list"][0].toString(),
+        areaName: "",
         userName: item["owner"]["nickname"].toString(),
-        online: int.tryParse(
-                item["room_view_stats"]["display_value"].toString()) ??
-            0,
+        online:
+            int.tryParse(item["room_view_stats"]["display_value"].toString()) ??
+                0,
       );
       items.add(roomItem);
     }
@@ -671,6 +673,7 @@ class DouyinSite implements LiveSite {
         roomId: itemData["owner"]["web_rid"].toString(),
         title: itemData["title"].toString(),
         cover: itemData["cover"]["url_list"][0].toString(),
+        areaName: "",
         userName: itemData["owner"]["nickname"].toString(),
         online: int.tryParse(itemData["stats"]["total_user"].toString()) ?? 0,
       );

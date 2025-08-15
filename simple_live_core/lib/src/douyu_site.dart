@@ -70,6 +70,7 @@ class DouyuSite implements LiveSite {
         online: item['ol'],
         roomId: item['rid'].toString(),
         title: item['rn'].toString(),
+        areaName: item['c2name_display'].toString(),
         userName: item['nn'].toString(),
       );
       items.add(roomItem);
@@ -165,6 +166,7 @@ class DouyuSite implements LiveSite {
         online: item['ol'],
         roomId: item['rid'].toString(),
         title: item['rn'].toString(),
+        areaName: item['c2name_display'].toString(),
         userName: item['nn'].toString(),
       );
       items.add(roomItem);
@@ -263,6 +265,7 @@ class DouyuSite implements LiveSite {
         roomId: item["rid"].toString(),
         title: item["roomName"].toString(),
         cover: item["roomSrc"].toString(),
+        areaName: item["cateName"].toString(),
         userName: item["nickName"].toString(),
         online: parseHotNum(item["hot"].toString()),
       );

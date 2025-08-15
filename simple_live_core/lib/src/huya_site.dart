@@ -103,6 +103,7 @@ class HuyaSite implements LiveSite {
         roomId: item["profileRoom"].toString(),
         title: title,
         cover: cover,
+        areaName: item["gameFullName"].toString(),
         userName: item["nick"].toString(),
         online: int.tryParse(item["totalCount"].toString()) ?? 0,
       );
@@ -250,6 +251,7 @@ class HuyaSite implements LiveSite {
         roomId: item["profileRoom"].toString(),
         title: title,
         cover: cover,
+        areaName: item["gameFullName"].toString(),
         userName: item["nick"].toString(),
         online: int.tryParse(item["totalCount"].toString()) ?? 0,
       );
@@ -395,6 +397,7 @@ class HuyaSite implements LiveSite {
         roomId: item["room_id"].toString(),
         title: title,
         cover: cover,
+        areaName: item["gameName"].toString(),
         userName: item["game_nick"].toString(),
         online: int.tryParse(item["game_total_count"].toString()) ?? 0,
       );

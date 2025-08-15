@@ -10,6 +10,9 @@ class LiveRoomItem {
   /// 封面
   final String cover;
 
+  /// 分区名称
+  final String areaName;
+
   /// 用户名
   final String userName;
 
@@ -19,6 +22,7 @@ class LiveRoomItem {
     required this.roomId,
     required this.title,
     required this.cover,
+    required this.areaName,
     required this.userName,
     this.online = 0,
   });
@@ -29,6 +33,7 @@ class LiveRoomItem {
       "roomId": roomId,
       "title": title,
       "cover": cover,
+      "areaName": areaName,
       "userName": userName,
       "online": online,
     });

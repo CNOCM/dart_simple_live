@@ -56,21 +56,35 @@ class LiveRoomCard extends StatelessWidget {
                     ),
                   ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Icon(
-                        Remix.fire_fill,
-                        color: Colors.white,
-                        size: 14,
-                      ),
-                      AppStyle.hGap4,
-                      Text(
-                        Utils.onlineToString(item.online),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.white,
+                      Padding(
+                        padding: const EdgeInsets.only(left: 3),
+                        child: Text(
+                          item.areaName,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.white,
+                          ),
                         ),
-                      )
+                      ),
+                      Row(
+                        children: [
+                          const Icon(
+                            Remix.fire_fill,
+                            color: Colors.white,
+                            size: 14,
+                          ),
+                          AppStyle.hGap4,
+                          Text(
+                            Utils.onlineToString(item.online),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
