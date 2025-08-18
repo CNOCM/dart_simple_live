@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:remixicon/remixicon.dart';
@@ -187,10 +188,10 @@ Widget buildFullControls(
                       onPressed: () {
                         controller.enablePIP();
                       },
-                      icon: const ImageIcon(
-                        AssetImage('assets/icons/icon_scalewindow.png'),
-                        color: Colors.white,
-                        size: 24,
+                      icon: SvgPicture.asset(
+                        'assets/icons/icon_scalewindow.svg',
+                        width: 24,
+                        height: 24,
                       ),
                     ),
                   ),
@@ -241,9 +242,10 @@ Widget buildFullControls(
                     onPressed: () {
                       controller.refreshRoom();
                     },
-                    icon: const ImageIcon(
-                      AssetImage('assets/icons/icon_refresh.png'),
-                      color: Colors.white,
+                    icon: SvgPicture.asset(
+                      'assets/icons/icon_refresh.svg',
+                      width: 24,
+                      height: 24,
                     ),
                   ),
                   Offstage(
@@ -251,10 +253,10 @@ Widget buildFullControls(
                     child: IconButton(
                       onPressed: () => controller.showDanmakuState.value =
                           !controller.showDanmakuState.value,
-                      icon: const ImageIcon(
-                        AssetImage('assets/icons/icon_danmaku_open.png'),
-                        size: 24,
-                        color: Colors.white,
+                      icon: SvgPicture.asset(
+                        'assets/icons/icon_danmaku_close.svg',
+                        width: 24,
+                        height: 24,
                       ),
                     ),
                   ),
@@ -263,10 +265,10 @@ Widget buildFullControls(
                     child: IconButton(
                       onPressed: () => controller.showDanmakuState.value =
                           !controller.showDanmakuState.value,
-                      icon: const ImageIcon(
-                        AssetImage('assets/icons/icon_danmaku_close.png'),
-                        size: 24,
-                        color: Colors.white,
+                      icon: SvgPicture.asset(
+                        'assets/icons/icon_danmaku_open.svg',
+                        width: 24,
+                        height: 24,
                       ),
                     ),
                   ),
@@ -274,10 +276,10 @@ Widget buildFullControls(
                     onPressed: () {
                       showDanmakuSettings(controller);
                     },
-                    icon: const ImageIcon(
-                      AssetImage('assets/icons/icon_danmaku_setting2.png'),
-                      size: 24,
-                      color: Colors.white,
+                    icon: SvgPicture.asset(
+                      'assets/icons/icon_danmaku_setting.svg',
+                      width: 24,
+                      height: 24,
                     ),
                   ),
                   Obx(() {
@@ -303,10 +305,10 @@ Widget buildFullControls(
                         controller
                             .showVolumeSlider(volumeButtonkey.currentContext!);
                       },
-                      icon: const ImageIcon(
-                        AssetImage('assets/icons/icon_volume.png'),
-                        size: 24,
-                        color: Colors.white,
+                      icon: SvgPicture.asset(
+                        'assets/icons/icon_volume.svg',
+                        width: 24,
+                        height: 24,
                       ),
                     ),
                   ),
@@ -339,9 +341,10 @@ Widget buildFullControls(
                         controller.exitFull();
                       }
                     },
-                    icon: const ImageIcon(
-                      AssetImage('assets/icons/icon_fullscreen.png'),
-                      color: Colors.white,
+                    icon: SvgPicture.asset(
+                      'assets/icons/icon_fullscreen.svg',
+                      width: 24,
+                      height: 24,
                     ),
                   ),
                 ],
@@ -495,9 +498,10 @@ Widget buildControls(
                   onPressed: () {
                     controller.refreshRoom();
                   },
-                  icon: const ImageIcon(
-                    AssetImage('assets/icons/icon_refresh.png'),
-                    color: Colors.white,
+                  icon: SvgPicture.asset(
+                    'assets/icons/icon_refresh.svg',
+                    width: 24,
+                    height: 24,
                   ),
                 ),
                 Offstage(
@@ -505,10 +509,10 @@ Widget buildControls(
                   child: IconButton(
                     onPressed: () => controller.showDanmakuState.value =
                         !controller.showDanmakuState.value,
-                    icon: const ImageIcon(
-                      AssetImage('assets/icons/icon_danmaku_open.png'),
-                      size: 24,
-                      color: Colors.white,
+                    icon: SvgPicture.asset(
+                      'assets/icons/icon_danmaku_close.svg',
+                      width: 24,
+                      height: 24,
                     ),
                   ),
                 ),
@@ -517,10 +521,10 @@ Widget buildControls(
                   child: IconButton(
                     onPressed: () => controller.showDanmakuState.value =
                         !controller.showDanmakuState.value,
-                    icon: const ImageIcon(
-                      AssetImage('assets/icons/icon_danmaku_close.png'),
-                      size: 24,
-                      color: Colors.white,
+                    icon: SvgPicture.asset(
+                      'assets/icons/icon_danmaku_open.svg',
+                      width: 24,
+                      height: 24,
                     ),
                   ),
                 ),
@@ -528,10 +532,10 @@ Widget buildControls(
                   onPressed: () {
                     controller.showDanmuSettingsSheet();
                   },
-                  icon: const ImageIcon(
-                    AssetImage('assets/icons/icon_danmaku_setting2.png'),
-                    size: 24,
-                    color: Colors.white,
+                  icon: SvgPicture.asset(
+                    'assets/icons/icon_danmaku_setting.svg',
+                    width: 24,
+                    height: 24,
                   ),
                 ),
                 Obx(() {
@@ -557,10 +561,10 @@ Widget buildControls(
                         volumeButtonkey.currentContext!,
                       );
                     },
-                    icon: const ImageIcon(
-                      AssetImage('assets/icons/icon_volume.png'),
-                      size: 24,
-                      color: Colors.white,
+                    icon: SvgPicture.asset(
+                      'assets/icons/icon_volume.svg',
+                      width: 24,
+                      height: 24,
                     ),
                   ),
                 ),
@@ -597,10 +601,10 @@ Widget buildControls(
                     onPressed: () {
                       controller.enterSmallWindow();
                     },
-                    icon: const ImageIcon(
-                      AssetImage('assets/icons/icon_scalewindow.png'),
-                      color: Colors.white,
-                      size: 24,
+                    icon: SvgPicture.asset(
+                      'assets/icons/icon_scalewindow.svg',
+                      width: 24,
+                      height: 24,
                     ),
                   ),
                 ),
@@ -608,9 +612,10 @@ Widget buildControls(
                   onPressed: () {
                     controller.enterFullScreen();
                   },
-                  icon: const ImageIcon(
-                    AssetImage('assets/icons/icon_fullscreen.png'),
-                    color: Colors.white,
+                  icon: SvgPicture.asset(
+                    'assets/icons/icon_fullscreen.svg',
+                    width: 24,
+                    height: 24,
                   ),
                 ),
               ],

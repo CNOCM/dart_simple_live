@@ -75,6 +75,7 @@ dependencies:
         sdk: flutter
     flutter_localizations:
         sdk: flutter
+    flutter_svg: ^2.0.13
 
 dependency_overrides:
     screen_brightness: ^2.1.2
