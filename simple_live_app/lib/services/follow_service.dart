@@ -350,12 +350,18 @@ class FollowService extends GetxService {
       var file = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['json'],
+        withData: true,
       );
-      if (file == null) {
+      if (file == null || file.files.isEmpty) return;
+
+      var bytes = file.files.single.bytes;
+      if (bytes == null) {
+        SmartDialog.showToast("文件内容为空");
         return;
       }
-      var jsonFile = File(file.files.single.path!);
-      await inputJson(await jsonFile.readAsString());
+
+      var jsonString = utf8.decode(bytes);
+      await inputJson(jsonString);
       SmartDialog.showToast("导入成功");
     } catch (e) {
       Log.logPrint(e);
@@ -463,7 +469,7 @@ class FollowService extends GetxService {
             "userName": item.userName,
             "face": item.face,
             "addTime": item.addTime.toString(),
-            "tag": item.tag
+            "tag": item.tag.isEmpty ? "全部" : item.tag,
           },
         )
         .toList();
@@ -475,14 +481,16 @@ class FollowService extends GetxService {
 
     for (var item in data) {
       var user = FollowUser.fromJson(item);
-      // 导入关注列表同时导入标签列表 此方法可优化为所有导入逻辑
+
+      // 标签为空自动赋值 "全部"
+      if (user.tag.isEmpty) user.tag = "全部";
+
+      // 处理非“全部”标签
       if (user.tag != "全部") {
-        if (!DBService.instance.getFollowTagExistByTag(user.tag)) {
-          DBService.instance.addFollowTag(user.tag);
-        } else {
-          var tag = DBService.instance.getFollowTag(user.tag);
-          tag!.userId.add(item.id);
-          DBService.instance.updateFollowTag(tag);
+        var tagObj = DBService.instance.getFollowTag(user.tag);
+        if (tagObj != null && !tagObj.userId.contains(user.id)) {
+          tagObj.userId.add(user.id);
+          DBService.instance.updateFollowTag(tagObj);
         }
       }
       await DBService.instance.followBox.put(user.id, user);
