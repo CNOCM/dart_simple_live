@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
+import 'package:simple_live_app/app/app_style.dart';
 import 'package:simple_live_app/app/utils.dart';
 import 'package:simple_live_app/routes/route_path.dart';
 import 'package:simple_live_app/services/bilibili_account_service.dart';
@@ -78,49 +79,49 @@ class AccountController extends GetxController {
                   parseCookie(text);
                 },
               ),
-              const SizedBox(height: 12),
+              AppStyle.hGap12,
               // SESSDATA
               TextField(
                 controller: sessdataController,
                 decoration: inputDecoration('SESSDATA'),
               ),
-              const SizedBox(height: 12),
+              AppStyle.hGap12,
               // bili_jct
               TextField(
                 controller: biliJctController,
                 decoration: inputDecoration('bili_jct'),
               ),
-              const SizedBox(height: 12),
+              AppStyle.hGap12,
               // DedeUserID
               TextField(
                 controller: dedeUserIdController,
                 decoration: inputDecoration('DedeUserID'),
               ),
-              const SizedBox(height: 12),
+              AppStyle.hGap12,
               // DedeUserID__ckMd5
               TextField(
                 controller: dedeUserIdckMd5Controller,
                 decoration: inputDecoration('DedeUserID__ckMd5'),
               ),
-              const SizedBox(height: 12),
+              AppStyle.hGap12,
               // sid
               TextField(
                 controller: sidController,
                 decoration: inputDecoration('sid'),
               ),
-              const SizedBox(height: 12),
+              AppStyle.hGap12,
               // buvid3
               TextField(
                 controller: buvid3Controller,
                 decoration: inputDecoration('buvid3'),
               ),
-              const SizedBox(height: 12),
+              AppStyle.hGap12,
               // buvid4
               TextField(
                 controller: buvid4Controller,
                 decoration: inputDecoration('buvid4'),
               ),
-              const SizedBox(height: 12),
+              AppStyle.hGap12,
             ],
           ),
         ),

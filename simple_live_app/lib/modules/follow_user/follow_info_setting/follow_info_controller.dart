@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
+import 'package:simple_live_app/app/app_style.dart';
 import 'package:simple_live_app/app/constant.dart';
 import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/app/controller/base_controller.dart';
@@ -116,7 +117,7 @@ class FollowInfoController extends BasePageController<FollowUser> {
         children: [
           Text(
               '从：${Sites.allSites[current.siteId]?.name}  房间号：${current.roomId}'),
-          const SizedBox(height: 8),
+          AppStyle.hGap8,
           Text('到：${newSite.name}  房间号：$newRoomId'),
         ],
       ),

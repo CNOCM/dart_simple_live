@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:simple_live_app/app/app_style.dart';
 import 'package:simple_live_app/app/log.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
@@ -37,13 +38,13 @@ class TestPage extends StatelessWidget {
               icon: const Icon(Icons.check_circle_outline),
               label: const Text('测试功能一'),
             ),
-            const SizedBox(height: 16),
+            AppStyle.hGap16,
             ElevatedButton.icon(
               onPressed: () => function2(),
               icon: const Icon(Icons.check_circle_outline),
               label: const Text('测试功能二'),
             ),
-            const SizedBox(height: 16),
+            AppStyle.hGap16,
             ElevatedButton.icon(
               onPressed: () => function3(),
               icon: const Icon(Icons.check_circle_outline),

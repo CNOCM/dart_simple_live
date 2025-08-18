@@ -113,7 +113,7 @@ class FollowInfoPage extends GetView<FollowInfoController> {
                       Text('平台迁移（输入直播链接进行解析）'),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  AppStyle.hGap8,
                   Row(
                     children: [
                       Expanded(
@@ -131,7 +131,7 @@ class FollowInfoPage extends GetView<FollowInfoController> {
                           onSubmitted: (_) => controller.parseAndMigrate(),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      AppStyle.vGap8,
                       IconButton(
                         tooltip: '粘贴',
                         onPressed: controller.pasteFromClipboard,
@@ -144,7 +144,7 @@ class FollowInfoPage extends GetView<FollowInfoController> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  AppStyle.hGap8,
                   Text(
                     "other todo ...",
                     style: TextStyle(color: Colors.grey),
