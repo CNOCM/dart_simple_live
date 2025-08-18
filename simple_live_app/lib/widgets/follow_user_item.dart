@@ -52,173 +52,223 @@ class _FollowUserItemState extends State<FollowUserItem>
     final item = widget.item;
     final site = Sites.allSites[item.siteId]!;
 
-    return InkWell(
-      onTap: widget.onTap,
-      onLongPress: widget.onLongPress,
-      borderRadius: AppStyle.radius12,
-      splashColor: Theme.of(context).colorScheme.primary.withValues(alpha: .08),
-      child: Container(
-        margin: AppStyle.edgeInsetsV8,
-        padding: AppStyle.edgeInsetsA12,
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: AppStyle.radius12,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: .04),
-              blurRadius: 6,
-              offset: const Offset(0, 3),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: widget.onTap,
+        onLongPress: widget.onLongPress,
+        borderRadius: AppStyle.radius12,
+        splashColor:
+            Theme.of(context).colorScheme.primary.withValues(alpha: .08),
+        child: Container(
+          margin: AppStyle.edgeInsetsV8,
+          padding: AppStyle.edgeInsetsA16,
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: AppStyle.radius12,
+            border: Border.all(
+              color: Colors.grey.withValues(alpha: .08),
+              width: 1,
             ),
-          ],
-        ),
-        child: Row(
-          children: [
-            // 头像 + 红色呼吸光圈
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                if (item.liveStatus.value == 2)
-                  ScaleTransition(
-                    scale: _scaleAnimation,
-                    child: Container(
-                      width: 58,
-                      height: 58,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.red.withValues(alpha: .2),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: .03),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // 头像 + 呼吸光圈
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  if (item.liveStatus.value == 2)
+                    ScaleTransition(
+                      scale: _scaleAnimation,
+                      child: Container(
+                        width: 62,
+                        height: 62,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: RadialGradient(
+                            colors: [
+                              Colors.red.withValues(alpha: .25),
+                              Colors.red.withValues(alpha: .05),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                Container(
-                  padding: const EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: item.liveStatus.value == 2
-                          ? Colors.red
-                          : Colors.grey.withValues(alpha: .3),
-                      width: 2,
+                  Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: item.liveStatus.value == 2
+                            ? Colors.red
+                            : Colors.grey.withValues(alpha: .3),
+                        width: 2,
+                      ),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: AppStyle.radius24,
+                      child: NetImage(item.face, width: 50, height: 50),
                     ),
                   ),
-                  child: ClipRRect(
-                    borderRadius: AppStyle.radius24,
-                    child: NetImage(item.face, width: 48, height: 48),
+                ],
+              ),
+
+              AppStyle.hGap16,
+
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 用户名 + 分区 + 状态
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  item.userName,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: .2,
+                                      ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              AppStyle.hGap8,
+                            ],
+                          ),
+                        ),
+                        if (item.liveAreaName.isNotEmpty) ...[
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.withValues(alpha: .1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              item.liveAreaName,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: Colors.blue,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          AppStyle.hGap8, // 🔥 在这里插入间隔
+                        ],
+                        if (item.liveStatus.value != 0)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: item.liveStatus.value == 2
+                                  ? Colors.red.withValues(alpha: .12)
+                                  : Colors.grey.withValues(alpha: .12),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              getStatus(item.liveStatus.value),
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: item.liveStatus.value == 2
+                                    ? Colors.red
+                                    : Colors.grey[700],
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+
+                    AppStyle.vGap4,
+
+                    // 平台 + 直播标题
+                    Row(
+                      children: [
+                        Image.asset(site.logo, width: 18),
+                        AppStyle.hGap8,
+                        Text(
+                          site.name,
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                        ),
+                        if (item.liveStatus.value == 2 &&
+                            item.liveTitle.isNotEmpty) ...[
+                          AppStyle.hGap12,
+                          Expanded(
+                            child: Text(
+                              item.liveTitle,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.orange,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+
+                    // 正在观看 / 开播时间
+                    if (widget.playing ||
+                        (item.liveStatus.value == 2 &&
+                            item.liveStartTime != null))
+                      Padding(
+                        padding: AppStyle.edgeInsetsT4,
+                        child: Text(
+                          widget.playing
+                              ? "正在观看"
+                              : '已开播 ${formatLiveDuration(item.liveStartTime)}',
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    fontWeight:
+                                        widget.playing ? FontWeight.w600 : null,
+                                    color: widget.playing
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Colors.grey,
+                                  ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+
+              // 移除按钮
+              if (widget.onRemove != null && !widget.playing) ...[
+                AppStyle.hGap8,
+                InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: widget.onRemove,
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    child: const Icon(
+                      Remix.dislike_line,
+                      size: 20,
+                      color: Colors.redAccent,
+                    ),
                   ),
                 ),
               ],
-            ),
-
-            AppStyle.hGap12,
-
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 用户名 + 状态
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          item.userName,
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w600),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      if (item.liveStatus.value != 0)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: item.liveStatus.value == 2
-                                ? Colors.red.withValues(alpha: .15)
-                                : Colors.grey.withValues(alpha: .15),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            getStatus(item.liveStatus.value),
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: item.liveStatus.value == 2
-                                  ? Colors.red
-                                  : Colors.grey,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-
-                  AppStyle.vGap4,
-
-                  Row(
-                    children: [
-                      Image.asset(site.logo, width: 18),
-                      AppStyle.hGap8,
-                      Text(
-                        site.name,
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodySmall
-                            ?.copyWith(color: Colors.grey),
-                      ),
-                      if (item.liveStatus.value == 2 &&
-                          item.liveTitle.isNotEmpty) ...[
-                        AppStyle.hGap12,
-                        Expanded(
-                          child: Text(
-                            item.liveTitle,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.orange,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-
-                  if (widget.playing ||
-                      (item.liveStatus.value == 2 &&
-                          item.liveStartTime != null))
-                    Padding(
-                      padding: AppStyle.edgeInsetsT4,
-                      child: Text(
-                        widget.playing
-                            ? "正在观看"
-                            : '开播了${formatLiveDuration(item.liveStartTime)}',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              fontWeight:
-                                  widget.playing ? FontWeight.w600 : null,
-                              color: widget.playing
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Colors.grey,
-                            ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-
-            if (widget.onRemove != null && !widget.playing)
-              Material(
-                color: Colors.red.withValues(alpha: .08),
-                shape: const CircleBorder(),
-                child: InkWell(
-                  customBorder: const CircleBorder(),
-                  onTap: widget.onRemove,
-                  child: const Padding(
-                    padding: EdgeInsets.all(6),
-                    child: Icon(Remix.dislike_line,
-                        size: 20, color: Colors.redAccent),
-                  ),
-                ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
