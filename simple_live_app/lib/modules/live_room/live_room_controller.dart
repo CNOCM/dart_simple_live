@@ -853,44 +853,57 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     Utils.showBottomSheet(
       title: "关注列表",
       child: Obx(
-        () => Stack(
-          children: [
-            RefreshIndicator(
-              onRefresh: FollowService.instance.loadData,
-              child: ListView.builder(
-                itemCount: FollowService.instance.liveList.length,
-                itemBuilder: (_, i) {
-                  var item = FollowService.instance.liveList[i];
-                  return Obx(
-                    () => FollowUserItem(
-                      item: item,
-                      playing: rxSite.value.id == item.siteId &&
-                          rxRoomId.value == item.roomId,
-                      onTap: () {
-                        Get.back();
-                        resetRoom(
-                          Sites.allSites[item.siteId]!,
-                          item.roomId,
-                        );
-                      },
-                    ),
-                  );
-                },
-              ),
-            ),
-            if (Platform.isLinux || Platform.isWindows || Platform.isMacOS)
-              Positioned(
-                right: 12,
-                bottom: 12,
-                child: Obx(
-                  () => DesktopRefreshButton(
-                    refreshing: FollowService.instance.updating.value,
-                    onPressed: FollowService.instance.loadData,
-                  ),
+        () {
+          var list = [...FollowService.instance.liveList];
+          list.sort((a, b) {
+            bool aPlaying =
+                rxSite.value.id == a.siteId && rxRoomId.value == a.roomId;
+            bool bPlaying =
+                rxSite.value.id == b.siteId && rxRoomId.value == b.roomId;
+            if (aPlaying && !bPlaying) return -1;
+            if (!aPlaying && bPlaying) return 1;
+            return 0;
+          });
+
+          return Stack(
+            children: [
+              RefreshIndicator(
+                onRefresh: FollowService.instance.loadData,
+                child: ListView.builder(
+                  itemCount: list.length,
+                  itemBuilder: (_, i) {
+                    var item = list[i];
+                    return Obx(
+                      () => FollowUserItem(
+                        item: item,
+                        playing: rxSite.value.id == item.siteId &&
+                            rxRoomId.value == item.roomId,
+                        onTap: () {
+                          Get.back();
+                          resetRoom(
+                            Sites.allSites[item.siteId]!,
+                            item.roomId,
+                          );
+                        },
+                      ),
+                    );
+                  },
                 ),
               ),
-          ],
-        ),
+              if (Platform.isLinux || Platform.isWindows || Platform.isMacOS)
+                Positioned(
+                  right: 12,
+                  bottom: 12,
+                  child: Obx(
+                    () => DesktopRefreshButton(
+                      refreshing: FollowService.instance.updating.value,
+                      onPressed: FollowService.instance.loadData,
+                    ),
+                  ),
+                ),
+            ],
+          );
+        },
       ),
     );
   }

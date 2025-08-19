@@ -874,44 +874,57 @@ void showFollowUser(LiveRoomController controller) {
     width: 400,
     useSystem: true,
     child: Obx(
-      () => Stack(
-        children: [
-          RefreshIndicator(
-            onRefresh: FollowService.instance.loadData,
-            child: ListView.builder(
-              itemCount: FollowService.instance.liveList.length,
-              itemBuilder: (_, i) {
-                var item = FollowService.instance.liveList[i];
-                return Obx(
-                  () => FollowUserItem(
-                    item: item,
-                    playing: controller.rxSite.value.id == item.siteId &&
-                        controller.rxRoomId.value == item.roomId,
-                    onTap: () {
-                      Utils.hideRightDialog();
-                      controller.resetRoom(
-                        Sites.allSites[item.siteId]!,
-                        item.roomId,
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
-          ),
-          if (Platform.isLinux || Platform.isWindows || Platform.isMacOS)
-            Positioned(
-              right: 12,
-              bottom: 12,
-              child: Obx(
-                () => DesktopRefreshButton(
-                  refreshing: FollowService.instance.updating.value,
-                  onPressed: FollowService.instance.loadData,
-                ),
+      () {
+        var list = [...FollowService.instance.liveList];
+        list.sort((a, b) {
+          bool aPlaying = controller.rxSite.value.id == a.siteId &&
+              controller.rxRoomId.value == a.roomId;
+          bool bPlaying = controller.rxSite.value.id == b.siteId &&
+              controller.rxRoomId.value == b.roomId;
+          if (aPlaying && !bPlaying) return -1;
+          if (!aPlaying && bPlaying) return 1;
+          return 0;
+        });
+
+        return Stack(
+          children: [
+            RefreshIndicator(
+              onRefresh: FollowService.instance.loadData,
+              child: ListView.builder(
+                itemCount: list.length,
+                itemBuilder: (_, i) {
+                  var item = list[i];
+                  return Obx(
+                    () => FollowUserItem(
+                      item: item,
+                      playing: controller.rxSite.value.id == item.siteId &&
+                          controller.rxRoomId.value == item.roomId,
+                      onTap: () {
+                        Utils.hideRightDialog();
+                        controller.resetRoom(
+                          Sites.allSites[item.siteId]!,
+                          item.roomId,
+                        );
+                      },
+                    ),
+                  );
+                },
               ),
             ),
-        ],
-      ),
+            if (Platform.isLinux || Platform.isWindows || Platform.isMacOS)
+              Positioned(
+                right: 12,
+                bottom: 12,
+                child: Obx(
+                  () => DesktopRefreshButton(
+                    refreshing: FollowService.instance.updating.value,
+                    onPressed: FollowService.instance.loadData,
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
     ),
   );
 }
