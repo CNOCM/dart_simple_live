@@ -124,79 +124,82 @@ class FollowUserPage extends GetView<FollowUserController> {
         children: [
           Padding(
             padding: AppStyle.edgeInsetsL8,
-            child: Row(
-              children: [
-                Expanded(
-                  child: Obx(
-                    () => SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Wrap(
-                          spacing: 12,
-                          children: controller.tagList.map((option) {
-                            return FilterButton(
-                              text: option.tag,
-                              selected: controller.filterMode.value == option,
-                              onTap: () {
-                                controller.setFilterMode(option);
-                              },
-                            );
-                          }).toList()),
-                    ),
-                  ),
-                ),
-              ],
+            child: Obx(
+              () => SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Wrap(
+                    spacing: 12,
+                    children: controller.tagList.map((option) {
+                      return FilterButton(
+                        text: option.tag,
+                        selected: controller.filterMode.value == option,
+                        onTap: () {
+                          controller.setFilterMode(option);
+                        },
+                      );
+                    }).toList()),
+              ),
             ),
           ),
           Expanded(
-            child: PageGridView(
-              crossAxisSpacing: 12,
-              crossAxisCount: count,
-              pageController: controller,
-              refreshOnStart: true,
-              showPCRefreshButton: false,
-              itemBuilder: (_, i) {
-                var item = controller.list[i];
-                var site = Sites.allSites[item.siteId]!;
-                return FollowUserItem(
-                  item: item,
-                  onRemove: () {
-                    controller.removeItem(item);
-                  },
-                  onTap: () {
-                    AppNavigator.toLiveRoomDetail(
-                        site: site, roomId: item.roomId);
-                  },
-                  onLongPress: () {
-                    // 长按弹出操作：设置标签或查看详情
-                    Get.bottomSheet(
-                      SafeArea(
-                        child: Wrap(
-                          children: [
-                            ListTile(
-                              leading: const Icon(Remix.price_tag_3_line),
-                              title: const Text('设置标签'),
-                              onTap: () {
-                                Get.back();
-                                setFollowTagDialog(item);
-                              },
+            child: Obx(() {
+              final sortedList = [...controller.list];
+              return PageGridView(
+                crossAxisSpacing: 12,
+                crossAxisCount: count,
+                pageController: controller,
+                refreshOnStart: true,
+                showPCRefreshButton: false,
+                itemBuilder: (context, i) {
+                  var item = sortedList[i];
+                  var site = Sites.allSites[item.siteId]!;
+
+                  return AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    switchInCurve: Curves.easeInOut,
+                    switchOutCurve: Curves.easeInOut,
+                    child: FollowUserItem(
+                      item: item,
+                      onRemove: () {
+                        controller.removeItem(item);
+                      },
+                      onTap: () {
+                        AppNavigator.toLiveRoomDetail(
+                            site: site, roomId: item.roomId);
+                      },
+                      onLongPress: () {
+                        // 长按弹出操作：设置标签或查看详情
+                        Get.bottomSheet(
+                          SafeArea(
+                            child: Wrap(
+                              children: [
+                                ListTile(
+                                  leading: const Icon(Remix.price_tag_3_line),
+                                  title: const Text('设置标签'),
+                                  onTap: () {
+                                    Get.back();
+                                    setFollowTagDialog(item);
+                                  },
+                                ),
+                                ListTile(
+                                  leading: const Icon(Remix.information_line),
+                                  title: const Text('查看详情'),
+                                  onTap: () {
+                                    Get.back();
+                                    AppNavigator.toFollowInfo(item);
+                                  },
+                                ),
+                              ],
                             ),
-                            ListTile(
-                              leading: const Icon(Remix.information_line),
-                              title: const Text('查看详情'),
-                              onTap: () {
-                                Get.back();
-                                AppNavigator.toFollowInfo(item);
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                      backgroundColor: Theme.of(context).cardColor,
-                    );
-                  },
-                );
-              },
-            ),
+                          ),
+                          backgroundColor: Theme.of(context).cardColor,
+                        );
+                      },
+                    ),
+                  );
+                },
+              );
+            }),
           ),
         ],
       ),

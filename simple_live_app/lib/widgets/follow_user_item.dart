@@ -67,10 +67,9 @@ class _FollowUserItemState extends State<FollowUserItem>
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // 头像
               Container(
-                width: 42,
-                height: 42,
+                width: 48,
+                height: 48,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
@@ -81,182 +80,145 @@ class _FollowUserItemState extends State<FollowUserItem>
                 ),
                 child: ClipRRect(
                   borderRadius: AppStyle.radius24,
-                  child: NetImage(item.face, width: 42, height: 42),
+                  child: NetImage(item.face, width: 48, height: 48),
                 ),
               ),
-
               AppStyle.hGap12,
-
-              // 内容
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    if (isLive || widget.playing) ...[
-                      // 三行布局
-                      Text(
-                        item.userName,
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: .2,
-                            ),
-                      ),
-                      AppStyle.vGap4,
-
-                      // 第二行：直播标题 + 分区 + 状态
-                      Row(
-                        children: [
-                          if (item.liveTitle.isNotEmpty)
-                            Expanded(
-                              child: Text(
-                                item.liveTitle,
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.orange,
-                                  fontWeight: FontWeight.w600,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            item.userName,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: .2,
                                 ),
-                                overflow: TextOverflow.ellipsis,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (item.liveAreaName.isNotEmpty)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 1),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: Colors.blue.withValues(alpha: .1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              item.liveAreaName,
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: Colors.blue,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
+                          ),
+                        AppStyle.hGap8,
+                        if (widget.playing || item.liveStatus.value != 0)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 2),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: widget.playing
+                                  ? Colors.green.withValues(alpha: .12)
+                                  : (isLive
+                                      ? Colors.red.withValues(alpha: .12)
+                                      : Colors.grey.withValues(alpha: .12)),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              widget.playing ? "观看中" : (isLive ? "直播中" : "未开播"),
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: widget.playing
+                                    ? Colors.green
+                                    : (isLive ? Colors.red : Colors.grey),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    if (item.liveTitle.isNotEmpty &&
+                        (widget.playing || isLive)) ...[
+                      AppStyle.vGap4,
+                      Text(
+                        item.liveTitle,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: Colors.orange,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                    AppStyle.vGap4,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Row(
                             children: [
-                              if (item.liveAreaName.isNotEmpty)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 6, vertical: 1),
-                                  decoration: BoxDecoration(
-                                    color: Colors.blue.withValues(alpha: .1),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    item.liveAreaName,
-                                    style: const TextStyle(
-                                      fontSize: 10,
-                                      color: Colors.blue,
+                              Image.asset(site.logo, width: 16),
+                              AppStyle.hGap4,
+                              Text(
+                                site.name,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color: Colors.grey[600],
                                       fontWeight: FontWeight.w500,
+                                      fontSize: 11,
                                     ),
-                                  ),
-                                ),
+                              ),
                               AppStyle.hGap8,
-                              if (item.liveStatus.value != 0)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: isLive
-                                        ? Colors.red.withValues(alpha: .12)
-                                        : Colors.grey.withValues(alpha: .12),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
+                              if (isLive && item.liveStartTime != null)
+                                Flexible(
                                   child: Text(
-                                    getStatus(item.liveStatus.value),
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w600,
-                                      color: isLive
-                                          ? Colors.red
-                                          : Colors.grey[700],
-                                    ),
+                                    '已开播 ${formatLiveDuration(item.liveStartTime)}',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.copyWith(
+                                          color: Colors.grey,
+                                          fontSize: 10,
+                                        ),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                             ],
                           ),
-                        ],
-                      ),
-                      AppStyle.vGap4,
-
-                      // 第三行：平台 + 开播时间
-                      Row(
-                        children: [
-                          Image.asset(site.logo, width: 16),
-                          AppStyle.hGap4,
-                          Text(
-                            site.name,
-                            style:
-                                Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: Colors.grey[600],
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 11,
-                                    ),
-                          ),
-                          AppStyle.hGap8,
-                          if (widget.playing || (item.liveStartTime != null))
-                            Text(
-                              widget.playing
-                                  ? "正在观看"
-                                  : '已开播 ${formatLiveDuration(item.liveStartTime)}',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                    fontWeight:
-                                        widget.playing ? FontWeight.w600 : null,
-                                    color: widget.playing
-                                        ? Theme.of(context).colorScheme.primary
-                                        : Colors.grey,
-                                    fontSize: 10,
-                                  ),
-                            ),
-                        ],
-                      ),
-                    ] else ...[
-                      // 两行布局（未开播）
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              item.userName,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: .2,
-                                  ),
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: Colors.grey.withValues(alpha: .12),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: const Text(
-                              '未开播',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.grey,
+                        ),
+                        if (item.watchDuration != null &&
+                            item.watchDuration!.isNotEmpty)
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.access_time,
+                                  size: 12, color: Colors.grey),
+                              AppStyle.hGap4,
+                              Text(
+                                item.watchDuration!,
+                                style: const TextStyle(
+                                    fontSize: 10, color: Colors.grey),
                               ),
-                            ),
+                            ],
                           ),
-                        ],
-                      ),
-                      AppStyle.vGap4,
-                      Row(
-                        children: [
-                          Image.asset(site.logo, width: 16),
-                          AppStyle.hGap4,
-                          Text(
-                            site.name,
-                            style:
-                                Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: Colors.grey[600],
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 11,
-                                    ),
-                          ),
-                        ],
-                      ),
-                    ],
+                      ],
+                    ),
                   ],
                 ),
               ),
-
-              // 移除按钮
               if (widget.onRemove != null && !widget.playing) ...[
                 AppStyle.hGap4,
                 InkWell(
