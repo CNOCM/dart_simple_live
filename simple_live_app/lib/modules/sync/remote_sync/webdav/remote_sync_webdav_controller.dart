@@ -218,7 +218,7 @@ class RemoteSyncWebDAVController extends BaseController {
       // 遍历profile路径下的所有文件压缩
       archive.addDirectoryToArchive(profile.path, profile.path);
       final zipEncoder = ZipEncoder();
-      zipBytes = zipEncoder.encode(archive) ?? [];
+      zipBytes = zipEncoder.encode(archive);
       profile.clearSync();
     } catch (e) {
       Log.logPrint(e);

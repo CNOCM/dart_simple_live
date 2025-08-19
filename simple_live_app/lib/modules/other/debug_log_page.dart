@@ -26,7 +26,13 @@ class DebugLogPage extends StatelessWidget {
               final fileName = '$timestamp.log';
               final logFile = File('${dir.path}/$fileName');
               await logFile.writeAsString(msg);
-              Share.shareXFiles([XFile(logFile.path)]);
+
+              final params = ShareParams(
+                files: [XFile(logFile.path)],
+                text: '分享日志文件',
+              );
+
+              await SharePlus.instance.share(params);
             },
             icon: const Icon(Icons.save),
           ),

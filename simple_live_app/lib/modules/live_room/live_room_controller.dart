@@ -569,10 +569,12 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   }
 
   void share() {
-    if (detail.value == null) {
-      return;
-    }
-    Share.share(detail.value!.url);
+    if (detail.value == null) return;
+    SharePlus.instance.share(
+      ShareParams(
+        text: detail.value!.url,
+      ),
+    );
   }
 
   void copyUrl() {

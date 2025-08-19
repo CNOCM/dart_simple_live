@@ -28,7 +28,7 @@ class SearchListView extends StatelessWidget {
             ? PageGridView(
                 pageController: controller,
                 padding: AppStyle.edgeInsetsA12,
-                firstRefresh: false,
+                refreshOnStart: false,
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
                 crossAxisCount: roomRowCount,
@@ -42,7 +42,7 @@ class SearchListView extends StatelessWidget {
                 crossAxisSpacing: 12,
                 crossAxisCount: userRowCount,
                 pageController: controller,
-                firstRefresh: true,
+                refreshOnStart: true,
                 itemBuilder: (_, i) {
                   var item = controller.list[i] as LiveAnchorItem;
 

@@ -30,7 +30,7 @@ class HistoryPage extends GetView<HistoryController> {
         crossAxisSpacing: 12,
         crossAxisCount: rowCount,
         pageController: controller,
-        firstRefresh: true,
+        refreshOnStart: true,
         itemBuilder: (_, i) {
           var item = controller.list[i];
           var site = Sites.allSites[item.siteId]!;

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_easyrefresh/easy_refresh.dart';
+import 'package:easy_refresh/easy_refresh.dart';
 
 import 'package:get/get.dart';
 import 'package:simple_live_app/app/app_style.dart';
@@ -9,7 +9,7 @@ import 'package:simple_live_app/widgets/keep_alive_wrapper.dart';
 import 'package:simple_live_app/widgets/net_image.dart';
 import 'package:simple_live_app/widgets/shadow_card.dart';
 import 'package:simple_live_core/simple_live_core.dart';
-import 'package:sticky_headers/sticky_headers.dart';
+import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 
 class CategoryListView extends StatelessWidget {
   final String tag;
@@ -19,23 +19,20 @@ class CategoryListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return KeepAliveWrapper(
-      child: Obx(
-        () => EasyRefresh(
-          firstRefresh: true,
-          controller: controller.easyRefreshController,
-          onRefresh: controller.refreshData,
-          header: MaterialHeader(
-            completeDuration: const Duration(milliseconds: 400),
-          ),
-          child: ListView.builder(
-            padding: AppStyle.edgeInsetsA12,
-            itemCount: controller.list.length,
-            controller: controller.scrollController,
-            itemBuilder: (_, i) {
-              var item = controller.list[i];
-              return Column(
-                children: [
-                  StickyHeader(
+      child: EasyRefresh.builder(
+        refreshOnStart: true,
+        controller: controller.easyRefreshController,
+        onRefresh: controller.refreshData,
+        header: const MaterialHeader(),
+        onLoad: controller.loadData,
+        childBuilder: (context, physics) {
+          return Obx(() {
+            return CustomScrollView(
+              physics: physics,
+              controller: controller.scrollController,
+              slivers: [
+                for (var item in controller.list)
+                  SliverStickyHeader(
                     header: Container(
                       padding: AppStyle.edgeInsetsV8.copyWith(left: 4),
                       color: Theme.of(context).scaffoldBackgroundColor,
@@ -43,42 +40,58 @@ class CategoryListView extends StatelessWidget {
                       child: Text(
                         item.name,
                         style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                    content: Obx(
-                      () => GridView.count(
-                        shrinkWrap: true,
+                    sliver: Obx(() {
+                      return SliverPadding(
                         padding: AppStyle.edgeInsetsV8,
-                        physics: const NeverScrollableScrollPhysics(),
-                        crossAxisCount: MediaQuery.of(context).size.width ~/ 80,
-                        crossAxisSpacing: 8,
-                        mainAxisSpacing: 8,
-                        children: item.showAll.value
-                            ? (item.children
-                                .map(
-                                  (e) => buildSubCategory(e),
-                                )
-                                .toList())
-                            : (item.take15
-                                .map(
-                                  (e) => buildSubCategory(e),
-                                )
-                                .toList()
-                              ..add(buildShowMore(item))),
-                      ),
-                    ),
+                        sliver: SliverGrid(
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount:
+                                MediaQuery.of(context).size.width ~/ 80,
+                            crossAxisSpacing: 8,
+                            mainAxisSpacing: 8,
+                            childAspectRatio: 1,
+                          ),
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                              final subItem = item.showAll.value
+                                  ? item.children[index]
+                                  : (index < item.take15.length
+                                      ? item.take15[index]
+                                      : null);
+
+                              if (subItem != null) {
+                                return buildSubCategory(subItem, controller);
+                              } else if (!item.showAll.value &&
+                                  index == item.take15.length) {
+                                return buildShowMore(item, controller);
+                              } else {
+                                return const SizedBox.shrink();
+                              }
+                            },
+                            childCount: item.showAll.value
+                                ? item.children.length
+                                : item.take15.length + 1,
+                          ),
+                        ),
+                      );
+                    }),
                   ),
-                ],
-              );
-            },
-          ),
-        ),
+              ],
+            );
+          });
+        },
       ),
     );
   }
 
-  Widget buildSubCategory(LiveSubCategory item) {
+  Widget buildSubCategory(
+      LiveSubCategory item, CategoryListController controller) {
     return ShadowCard(
       onTap: () {
         AppNavigator.toCategoryDetail(site: controller.site, category: item);
@@ -104,7 +117,8 @@ class CategoryListView extends StatelessWidget {
     );
   }
 
-  Widget buildShowMore(AppLiveCategory item) {
+  Widget buildShowMore(
+      AppLiveCategory item, CategoryListController controller) {
     return ShadowCard(
       onTap: () {
         item.showAll.value = true;

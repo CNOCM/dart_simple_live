@@ -21,7 +21,7 @@ class HomeListView extends StatelessWidget {
       child: PageGridView(
         pageController: controller,
         padding: AppStyle.edgeInsetsA12,
-        firstRefresh: true,
+        refreshOnStart: true,
         mainAxisSpacing: 12,
         crossAxisSpacing: 12,
         crossAxisCount: c,
