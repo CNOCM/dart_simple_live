@@ -5,9 +5,12 @@ on:
     push:
         branches:
             - nightly
+        paths:
+            - 'simple_live_tv_app/**'
+
 jobs:
     # AndroidTV
-    build-androidTV:
+    build-android-tv:
         runs-on: macos-latest
         permissions:
             contents: write
@@ -81,27 +84,29 @@ jobs:
               run: echo "🍏 AndroidTV build done."
 
     release-nightly:
-        needs:
-            - build-androidTV
+        needs: [build-android-tv]
         runs-on: ubuntu-latest
         permissions:
             contents: write
         steps:
-            - name: Download Android TV artifacts
-              uses: actions/download-artifact@v4
+            - uses: actions/download-artifact@v4
               with:
-                  path: artifacts/android_tv
-                  name: android_tv
+                  path: artifacts
+                  merge-multiple: true
 
             - name: Generate release timestamp
               id: datetime
               run: echo "value=$(date +'%Y-%m-%d %H:%M')" >> "$GITHUB_OUTPUT"
 
-            - name: Upload TV APKs to nightly Release
+            - name: Install GitHub CLI
+              run: sudo apt-get update && sudo apt-get install -y gh
+
+            - name: Upload TV release assets
               run: |
-                  gh release upload nightly artifacts/android_tv/*.apk --clobber
-                  gh release edit nightly \
-                      --notes "Added Android TV build at ${{ steps.datetime.outputs.value }}"
+                  gh release create nightly ./artifacts/* \
+                    --notes "Automated nightly build at ${{ steps.datetime.outputs.value }}" \
+                    --prerelease --title "Nightly ${{ steps.datetime.outputs.value }}" --repo ${{ github.repository }} || true
+                  gh release upload nightly artifacts/* --clobber --repo ${{ github.repository }}
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

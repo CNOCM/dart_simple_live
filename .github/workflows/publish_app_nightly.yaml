@@ -5,6 +5,9 @@ on:
     push:
         branches:
             - nightly
+        paths:
+            - '**'
+            - '!simple_live_tv_app/**'
 
 jobs:
     # macOS + iOS + Android
@@ -17,10 +20,6 @@ jobs:
             STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
             KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
             KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-            TV_KEYSTORE_BASE64: ${{ secrets.TV_KEYSTORE_BASE64 }}
-            TV_STORE_PASSWORD: ${{ secrets.TV_STORE_PASSWORD }}
-            TV_KEY_PASSWORD: ${{ secrets.TV_KEY_PASSWORD }}
-            TV_KEY_ALIAS: ${{ secrets.TV_KEY_ALIAS }}
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
@@ -42,22 +41,6 @@ jobs:
                   echo "storePassword=${{ env.STORE_PASSWORD }}" >> simple_live_app/android/key.properties
                   echo "keyPassword=${{ env.KEY_PASSWORD }}" >> simple_live_app/android/key.properties
                   echo "keyAlias=${{ env.KEY_ALIAS }}" >> simple_live_app/android/key.properties
-
-            # Android TV 签名
-            - name: Decode Android TV keystore
-              if: env.TV_KEYSTORE_BASE64 != ''
-              uses: timheuer/base64-to-file@v1.2
-              id: android_tv_keystore
-              with:
-                  fileName: keystore_tv.jks
-                  encodedString: ${{ env.TV_KEYSTORE_BASE64 }}
-            - name: Create Android TV key.properties
-              if: env.TV_KEYSTORE_BASE64 != ''
-              run: |
-                  echo "storeFile=${{ steps.android_tv_keystore.outputs.filePath }}" > simple_live_tv_app/android/key.properties
-                  echo "storePassword=${{ env.TV_STORE_PASSWORD }}" >> simple_live_tv_app/android/key.properties
-                  echo "keyPassword=${{ env.TV_KEY_PASSWORD }}" >> simple_live_tv_app/android/key.properties
-                  echo "keyAlias=${{ env.TV_KEY_ALIAS }}" >> simple_live_tv_app/android/key.properties
 
             - name: Setup Java environment
               uses: actions/setup-java@v4
@@ -105,16 +88,6 @@ jobs:
               with:
                   name: android
                   path: simple_live_app/build/app/outputs/flutter-apk/*.apk
-
-            # - name: Build Android TV APK
-            #   run: |
-            #       cd simple_live_tv_app
-            #       flutter build apk --release --split-per-abi
-            # - name: Upload Android TV APK artifacts
-            #   uses: actions/upload-artifact@v4
-            #   with:
-            #       name: android_tv
-            #       path: simple_live_tv_app/build/app/outputs/flutter-apk/*.apk
 
             - name: Build iOS IPA
               run: |
@@ -241,63 +214,29 @@ jobs:
               run: echo "🍏 Windows build done."
 
     release-nightly:
-        needs:
-            - build-mac-ios-android
-            - build-linux
-            - build-windows
+        needs: [build-mac-ios-android, build-linux, build-windows]
         runs-on: ubuntu-latest
         permissions:
             contents: write
         steps:
-            - name: Download all artifacts
-              uses: actions/download-artifact@v4
+            - uses: actions/download-artifact@v4
               with:
-                  path: artifacts/mac_ios_android
-                  pattern: '{android,ios,mac,android_tv}'
+                  path: artifacts
                   merge-multiple: true
-
-            - name: Download Linux artifacts
-              uses: actions/download-artifact@v4
-              with:
-                  path: artifacts/linux
-                  pattern: linux
-                  merge-multiple: true
-
-            - name: Download Windows artifacts
-              uses: actions/download-artifact@v4
-              with:
-                  path: artifacts/windows
-                  pattern: windows
-                  merge-multiple: true
-
-            - name: Delete existing release
-              run: |
-                  gh release delete nightly --yes || true
-                  git tag -d nightly || true
-                  git push origin :refs/tags/nightly || true
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Generate release timestamp
               id: datetime
               run: echo "value=$(date +'%Y-%m-%d %H:%M')" >> "$GITHUB_OUTPUT"
 
-            - name: Create GitHub Release
-              uses: softprops/action-gh-release@v1
-              with:
-                  tag_name: nightly
-                  name: 'Nightly ${{ steps.datetime.outputs.value }}'
-                  body: "Automated nightly build from 'nightly' branch at ${{ steps.datetime.outputs.value }}"
-                  prerelease: true
-                  files: |
-                      artifacts/mac_ios_android/*.apk
-                      artifacts/mac_ios_android/*.ipa
-                      artifacts/mac_ios_android/*/*.dmg
-                      artifacts/mac_ios_android/*/*.zip
-                      artifacts/linux/*/*.deb
-                      artifacts/linux/*/*.zip
-                      artifacts/windows/*/*.msix
-                      artifacts/windows/*/*.zip
+            - name: Install GitHub CLI
+              run: sudo apt-get update && sudo apt-get install -y gh
+
+            - name: Upload release assets (overwrite)
+              run: |
+                  gh release create nightly ./artifacts/* \
+                    --notes "Automated nightly build at ${{ steps.datetime.outputs.value }}" \
+                    --prerelease --title "Nightly ${{ steps.datetime.outputs.value }}" --repo ${{ github.repository }} || true
+                  gh release upload nightly artifacts/* --clobber --repo ${{ github.repository }}
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
