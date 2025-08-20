@@ -1,0 +1,109 @@
+name: app-tv-build-action-nightly
+
+on:
+    workflow_dispatch:
+    push:
+        branches:
+            - nightly
+jobs:
+    # AndroidTV
+    build-androidTV:
+        runs-on: macos-latest
+        permissions:
+            contents: write
+        env:
+            TV_KEYSTORE_BASE64: ${{ secrets.TV_KEYSTORE_BASE64 }}
+            TV_STORE_PASSWORD: ${{ secrets.TV_STORE_PASSWORD }}
+            TV_KEY_PASSWORD: ${{ secrets.TV_KEY_PASSWORD }}
+            TV_KEY_ALIAS: ${{ secrets.TV_KEY_ALIAS }}
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  ref: nightly
+
+            # Android TV 签名
+            - name: Decode Android TV keystore
+              if: env.TV_KEYSTORE_BASE64 != ''
+              uses: timheuer/base64-to-file@v1.2
+              id: android_tv_keystore
+              with:
+                  fileName: keystore_tv.jks
+                  encodedString: ${{ env.TV_KEYSTORE_BASE64 }}
+            - name: Create Android TV key.properties
+              if: env.TV_KEYSTORE_BASE64 != ''
+              run: |
+                  echo "storeFile=${{ steps.android_tv_keystore.outputs.filePath }}" > simple_live_tv_app/android/key.properties
+                  echo "storePassword=${{ env.TV_STORE_PASSWORD }}" >> simple_live_tv_app/android/key.properties
+                  echo "keyPassword=${{ env.TV_KEY_PASSWORD }}" >> simple_live_tv_app/android/key.properties
+                  echo "keyAlias=${{ env.TV_KEY_ALIAS }}" >> simple_live_tv_app/android/key.properties
+
+            - name: Setup Java environment
+              uses: actions/setup-java@v4
+              with:
+                  distribution: zulu
+                  java-version: '17'
+                  cache: gradle
+
+            - name: Setup Flutter environment
+              uses: subosito/flutter-action@v2
+              with:
+                  flutter-version: '3.32.0'
+                  cache: true
+
+            - name: Get Flutter dependencies
+              run: cd simple_live_tv_app && flutter pub get
+
+            - name: Install fast-forge
+              run: |
+                  git clone https://github.com/fastforgedev/fastforge.git
+                  cd fastforge
+                  dart pub global activate melos
+                  melos run activate
+
+            - name: Build Android TV APK
+              run: |
+                  cd simple_live_tv_app
+                  flutter build apk --release --split-per-abi
+                  cd build/app/outputs/flutter-apk
+                  for file in app-*-release.apk; do
+                    abi=$(echo "$file" | sed -E 's/app-(.*)-release\.apk/\1/')
+                    mv "$file" "app-tv-${abi}-release.apk"
+                  done
+
+            - name: Upload Android TV APK artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                  name: android_tv
+                  path: simple_live_tv_app/build/app/outputs/flutter-apk/app-tv-*-release.apk
+
+            - name: AndroidTV build done
+              run: echo "🍏 AndroidTV build done."
+
+    release-nightly:
+        needs:
+            - build-androidTV
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+        steps:
+            - name: Download Android TV artifacts
+              uses: actions/download-artifact@v4
+              with:
+                  path: artifacts/android_tv
+                  name: android_tv
+
+            - name: Generate release timestamp
+              id: datetime
+              run: echo "value=$(date +'%Y-%m-%d %H:%M')" >> "$GITHUB_OUTPUT"
+
+            - name: Upload TV APKs to nightly Release
+              run: |
+                  gh release upload nightly artifacts/android_tv/*.apk --clobber
+                  gh release edit nightly \
+                      --notes "Added Android TV build at ${{ steps.datetime.outputs.value }}"
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Release updated
+              run: echo "🎉 TV APK added to nightly pre-release."
