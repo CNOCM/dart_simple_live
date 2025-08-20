@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "com.xycz.simple_live_tv_app"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "28.2.13676358"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

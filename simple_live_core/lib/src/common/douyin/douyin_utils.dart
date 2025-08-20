@@ -36,7 +36,7 @@ class DouyinUtils {
     return "";
   }
 
-  Future<Map<String, String>> get_ttwid_webid({required String req_url}) async {
+  Future<Map<String, String>> getTtwidWebid({required String reqUrl}) async {
     // 先请求以获取 ttwid 等 Cookie，再解析页面的 RENDER_DATA 获取 user_unique_id
     final headers = <String, String>{
       "User-Agent":
@@ -52,7 +52,7 @@ class DouyinUtils {
     try {
       // 先用 HEAD 获取 Set-Cookie（包含 ttwid）
       final headResp = await HttpClient.instance.head(
-        req_url,
+        reqUrl,
         header: headers,
       );
       final setCookies = headResp.headers["set-cookie"];
@@ -68,7 +68,7 @@ class DouyinUtils {
 
       // 再用 GET 拉取页面 HTML，解析 RENDER_DATA
       final html = await HttpClient.instance.getText(
-        req_url,
+        reqUrl,
         header: headers,
       );
 

@@ -37,6 +37,7 @@ class CategoryDetailController extends BasePageController<LiveRoomItemExt> {
             cover: e.cover,
             userName: e.userName,
             online: e.online,
+            areaName: '',
           ),
         )
         .toList();

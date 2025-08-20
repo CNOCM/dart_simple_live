@@ -256,22 +256,6 @@ class BiliBiliSite implements LiveSite {
     // 从 roomInfo 中提取 live_start_time
     String? liveStartTime = roomInfo["room_info"]["live_start_time"].toString();
 
-    // 计算开播时长并打印到控制台 (参考斗鱼的实现)
-    if (liveStartTime.isNotEmpty && liveStartTime != "0") {
-      // 检查是否为0，0可能表示未开播或无此信息
-      try {
-        int startTimeStamp = int.parse(liveStartTime);
-        int currentTimeStamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-        int durationInSeconds = currentTimeStamp - startTimeStamp;
-
-        int hours = durationInSeconds ~/ 3600;
-        int minutes = (durationInSeconds % 3600) ~/ 60;
-        int seconds = durationInSeconds % 60;
-
-        String formattedDuration =
-            '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-      } catch (e) {}
-    }
     return LiveRoomDetail(
       roomId: realRoomId,
       title: roomInfo["room_info"]["title"].toString(),

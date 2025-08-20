@@ -33,7 +33,7 @@ class SyncController extends BaseController {
 
   @override
   void onInit() {
-    connect();
+    // connect();
     super.onInit();
   }
 

@@ -8,7 +8,6 @@ import 'package:html_unescape/html_unescape.dart';
 import 'package:simple_live_core/simple_live_core.dart';
 import 'package:simple_live_core/src/common/http_client.dart';
 import 'package:simple_live_core/src/common/js_engine.dart';
-import 'package:html_unescape/html_unescape.dart';
 
 class DouyuSite implements LiveSite {
   @override

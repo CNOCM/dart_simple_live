@@ -41,6 +41,7 @@ class HotliveController extends BasePageController<LiveRoomItemExt> {
               cover: e.cover,
               userName: e.userName,
               online: e.online,
+              areaName: '',
             ))
         .toList();
   }
@@ -59,6 +60,7 @@ class LiveRoomItemExt extends LiveRoomItem {
     required super.cover,
     required super.userName,
     super.online = 0,
+    required super.areaName,
   });
 
   AppFocusNode focusNode = AppFocusNode();

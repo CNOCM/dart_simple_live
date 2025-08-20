@@ -157,9 +157,8 @@ class SettingsPage extends GetView<SettingsController> {
             autofocus: controller.compatibleModeFocusNode.isFocused.value,
             title: "兼容模式",
             items: const {0: "关", 1: "开"},
-            value: AppSettingsController.instance.playerCompatMode.value
-                ? 1
-                : 0,
+            value:
+                AppSettingsController.instance.playerCompatMode.value ? 1 : 0,
             onChanged: (e) {
               AppSettingsController.instance.setPlayerCompatMode(
                 e == 1 ? true : false,

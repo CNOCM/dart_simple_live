@@ -1,10 +1,8 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:simple_live_tv_app/app/controller/base_controller.dart';
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
@@ -21,6 +19,7 @@ mixin PlayerMixin {
   late final player = Player(
     configuration: const PlayerConfiguration(
       title: "Simple Live Player",
+      logLevel: MPVLogLevel.info,
       // bufferSize:
       //     // media-kit #549
       //     AppSettingsController.instance.playerBufferSize.value * 1024 * 1024,
@@ -146,20 +145,10 @@ mixin PlayerStateMixin on PlayerMixin {
 }
 mixin PlayerDanmakuMixin on PlayerStateMixin {
   /// 弹幕控制器
-  DanmakuController? danmakuController;
+  late DanmakuController? danmakuController;
 
   void initDanmakuController(DanmakuController e) {
     danmakuController = e;
-    danmakuController?.updateOption(
-      DanmakuOption(
-        fontSize: AppSettingsController.instance.danmuSize.value.w,
-        area: AppSettingsController.instance.danmuArea.value,
-        duration: AppSettingsController.instance.danmuSpeed.value.toInt(),
-        opacity: AppSettingsController.instance.danmuOpacity.value,
-        showStroke: AppSettingsController.instance.danmuStrokeWidth.value > 0,
-        fontWeight: AppSettingsController.instance.danmuFontWeight.value,
-      ),
-    );
   }
 
   void updateDanmuOption(DanmakuOption? option) {
@@ -195,18 +184,6 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
   /// 释放一些系统状态
   Future resetSystem() async {
     await WakelockPlus.disable();
-  }
-
-  /// 是否是IOS16以下
-  Future<bool> beforeIOS16() async {
-    if (Platform.isIOS) {
-      var info = await deviceInfo.iosInfo;
-      var version = info.systemVersion;
-      var versionInt = int.tryParse(version.split('.').first) ?? 0;
-      return versionInt < 16;
-    } else {
-      return false;
-    }
   }
 }
 

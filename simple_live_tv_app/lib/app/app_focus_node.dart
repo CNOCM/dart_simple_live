@@ -9,7 +9,7 @@ class AppFocusNode extends FocusNode {
     addListener(updateFocus);
   }
 
-  updateFocus() {
+  void updateFocus() {
     isFocused.value = hasFocus;
   }
 

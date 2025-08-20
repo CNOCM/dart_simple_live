@@ -16,14 +16,18 @@ import 'package:simple_live_tv_app/widgets/settings_item_widget.dart';
 import 'package:simple_live_tv_app/widgets/status/app_empty_widget.dart';
 
 Widget playerControls(VideoState videoState, LiveRoomController controller) {
-  return buildControls(videoState, controller);
+  return Stack(
+    children: [
+      buildControls(videoState, controller),
+      buildDanmuView(videoState, controller),
+    ],
+  );
 }
 
 Widget buildControls(VideoState videoState, LiveRoomController controller) {
   return Stack(
     children: [
       Container(),
-      buildDanmuView(videoState, controller),
       // 点击播放器打开设置
       Positioned.fill(
         child: GestureDetector(onTap: () => showPlayerSettings(controller)),
@@ -218,7 +222,14 @@ Widget buildDanmuView(VideoState videoState, LiveRoomController controller) {
   controller.danmakuView ??= DanmakuScreen(
     key: controller.globalDanmuKey,
     createdController: controller.initDanmakuController,
-    option: DanmakuOption(fontSize: 40.w),
+    option: DanmakuOption(
+      fontSize: AppSettingsController.instance.danmuSize.value.sp,
+      area: AppSettingsController.instance.danmuArea.value,
+      duration: AppSettingsController.instance.danmuSpeed.value.toInt(),
+      opacity: AppSettingsController.instance.danmuOpacity.value,
+      showStroke: AppSettingsController.instance.danmuStrokeWidth.value > 0,
+      fontWeight: AppSettingsController.instance.danmuFontWeight.value,
+    ),
   );
   return Positioned.fill(
     top: padding.top,
