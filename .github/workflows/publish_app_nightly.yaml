@@ -233,10 +233,14 @@ jobs:
 
             - name: Upload release assets (overwrite)
               run: |
-                  gh release create nightly ./artifacts/* \
-                    --notes "Automated nightly build at ${{ steps.datetime.outputs.value }}" \
-                    --prerelease --title "Nightly ${{ steps.datetime.outputs.value }}" --repo ${{ github.repository }} || true
-                  gh release upload nightly artifacts/* --clobber --repo ${{ github.repository }}
+                  if gh release view nightly --repo ${{ github.repository }}; then
+                    echo "Release exists, just upload assets"
+                  else
+                    echo "Release not found, create it"
+                  gh release create nightly --prerelease --title "Nightly ${{ steps.datetime.outputs.value }}" --notes "Automated nightly build" --repo ${{ github.repository }}
+                  fi
+                      find artifacts -type f | xargs gh release upload nightly --clobber --repo ${{ github.repository }}
+
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

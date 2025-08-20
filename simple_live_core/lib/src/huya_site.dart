@@ -6,12 +6,13 @@ import 'package:simple_live_core/src/common/http_client.dart';
 import 'package:crypto/crypto.dart';
 import 'package:simple_live_core/src/model/tars/get_cdn_token_req.dart';
 import 'package:simple_live_core/src/model/tars/get_cdn_token_resp.dart';
-import 'package:tars_dart/tars/net/base_tars_http.dart';
+import 'package:tars_flutter/tars/net/base_tars_http.dart';
 
 class HuyaSite implements LiveSite {
   final String kUserAgent =
       "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36 Edg/117.0.0.0";
-  final BaseTarsHttp tupClient = BaseTarsHttp("http://wup.huya.com", "liveui");
+  final BaseTarsHttp tupClient =
+      BaseTarsHttp("http://wup.huya.com", "/tup", "liveui");
 
   String? playHuyaUA;
 

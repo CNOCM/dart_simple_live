@@ -46,7 +46,7 @@ class DouyuDanmaku implements LiveDanmaku {
     webSocketUtils?.connect();
   }
 
-  void joinRoom(roomId) {
+  void joinRoom(dynamic roomId) {
     webSocketUtils
         ?.sendMessage(serializeDouyu("type@=loginreq/roomid@=$roomId/"));
     webSocketUtils?.sendMessage(

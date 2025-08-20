@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_inlined_adds
-
 import 'package:get/get.dart';
 import 'package:simple_live_tv_app/modules/account/bilibili/qr_login_controller.dart';
 import 'package:simple_live_tv_app/modules/account/bilibili/qr_login_page.dart';

@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_inlined_adds
-
 import 'package:get/get.dart';
 import 'package:simple_live_app/modules/category/detail/category_detail_controller.dart';
 import 'package:simple_live_app/modules/category/detail/category_detail_page.dart';

@@ -113,7 +113,7 @@ class WebSocketUtils {
     onMessage?.call(data);
   }
 
-  void onError(e, s) {
+  void onError(dynamic e, dynamic s) {
     status = SocketStatus.failed;
     onClose?.call(e.toString());
   }
