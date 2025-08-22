@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
-import 'package:flutter_js/flutter_js.dart';
 import 'package:simple_live_core/simple_live_core.dart';
 import 'package:simple_live_core/src/common/js_engine.dart';
 import 'package:simple_live_core/src/common/web_socket_util.dart';
@@ -231,9 +230,8 @@ class DouyinDanmaku implements LiveDanmaku {
           .map((entry) => '${entry.key}=${entry.value}')
           .join(',');
       var md5SigParam = md5.convert(utf8.encode(sigParam)).toString();
-      JsEvalResult jsEvalResult =
-          JsEngine.jsRuntime.evaluate("get_sign('$md5SigParam')");
-      return jsEvalResult.stringResult;
+      var jsEvalResult = JsEngine.evaluate("get_sign('$md5SigParam')");
+      return jsEvalResult.toString();
     } catch (e) {
       CoreLog.error(e);
       return "";

@@ -21,7 +21,8 @@ dependencies:
             url: https://github.com/dbjiasb/TarsFlutter.git
             branch: main
     fixnum: ^1.1.1
-    flutter_js: ^0.8.5
+    jsf: ^0.6.1
+    dart_sm_new: ^0.1.9
 
 dev_dependencies:
     lints: ^6.0.0
