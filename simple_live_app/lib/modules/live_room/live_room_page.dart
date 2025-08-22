@@ -215,7 +215,7 @@ class LiveRoomPage extends GetView<LiveRoomController> {
                 icon: const Icon(Remix.share_line),
                 label: const Text("分享"),
               ),
-              (Platform.isWindows || Platform.isLinux)
+              (Platform.isWindows || Platform.isLinux || Platform.isMacOS)
                   ? TextButton.icon(
                       style: TextButton.styleFrom(
                         textStyle: const TextStyle(fontSize: 14),

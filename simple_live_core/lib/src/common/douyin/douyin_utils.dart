@@ -21,13 +21,11 @@ class DouyinUtils {
   static Future<String> getAbogus(
       {required String reqUrl, required String userAgent}) async {
     try {
-      JsEngine.init();
       await JsEngine.loadJSFile(
           "packages/simple_live_core/assets/js/a_bogus.js");
-      String abogus =
-          JsEngine.evaluate("generate_a_bogus('$reqUrl','$userAgent')")
-              .stringResult;
-      return abogus;
+      var abogus = await JsEngine.evaluateAsync(
+          "generate_a_bogus('$reqUrl','$userAgent')");
+      return abogus.stringResult;
     } catch (e) {
       CoreLog.error(e);
     } finally {

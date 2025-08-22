@@ -30,3 +30,4 @@ dev_dependencies:
 flutter:
     assets:
         - assets/js/douyin-webmssdk.js
+        - assets/js/a_bogus.js

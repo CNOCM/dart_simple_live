@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:simple_live_core/simple_live_core.dart';
 import 'package:simple_live_core/src/common/convert_helper.dart';
+import 'package:simple_live_core/src/common/douyin/douyin_utils.dart';
 import 'package:simple_live_core/src/common/http_client.dart';
 
 mixin DouyinRequestParams {
@@ -590,9 +591,9 @@ class DouyinSite implements LiveSite {
   @override
   Future<LiveSearchRoomResult> searchRooms(String keyword,
       {int page = 1}) async {
-    String serverUrl = "https://www.douyin.com/aweme/v1/web/live/search/";
-    var uri = Uri.parse(serverUrl)
-        .replace(scheme: "https", port: 443, queryParameters: {
+    String serverHost = "www.douyin.com";
+    String serverPath = "/aweme/v1/web/live/search/";
+    var queryParams = {
       "device_platform": "webapp",
       "aid": "6383",
       "channel": "channel_pc_web",
@@ -603,8 +604,13 @@ class DouyinSite implements LiveSite {
       "is_filter_search": "0",
       "from_group_id": "",
       "offset": ((page - 1) * 10).toString(),
-      "count": "10",
+      "count": "30",
+      "need_filter_settings": "1",
+      "list_type": "single",
+      "update_version_code": "170400",
       "pc_client_type": "1",
+      "pc_libra_divert": "Windows",
+      "cpu_core_num": "12",
       "version_code": "170400",
       "version_name": "17.4.0",
       "cookie_enabled": "true",
@@ -619,16 +625,25 @@ class DouyinSite implements LiveSite {
       "engine_version": "125.0.0.0",
       "os_name": "Windows",
       "os_version": "10",
-      "cpu_core_num": "12",
       "device_memory": "8",
       "platform": "PC",
       "downlink": "10",
       "effective_type": "4g",
-      "round_trip_time": "100",
+      "round_trip_time": "50",
       "webid": "7382872326016435738",
-    });
-    //var requestUrl = await getAbogusUrl(uri.toString());
-    var requestUrl = uri.toString();
+    };
+
+    var msToken = DouyinUtils.getMSToken();
+    queryParams["msToken"] = msToken;
+
+    var abogus = await DouyinUtils.getAbogus(
+      reqUrl: Uri(queryParameters: queryParams).query,
+      userAgent: DouyinRequestParams.kDefaultUserAgent,
+    );
+    queryParams["abogus"] = abogus;
+
+    var requestUrl = Uri.https(serverHost, serverPath, queryParams).toString();
+
     var headResp = await HttpClient.instance
         .head('https://live.douyin.com', header: headers);
     var dyCookie = "";
