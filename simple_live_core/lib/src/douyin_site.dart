@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:simple_live_core/simple_live_core.dart';
 import 'package:simple_live_core/src/common/convert_helper.dart';
+import 'package:simple_live_core/src/common/douyin/douyin_utils.dart';
 import 'package:simple_live_core/src/common/http_client.dart';
 
 mixin DouyinRequestParams {
@@ -464,29 +465,38 @@ class DouyinSite implements LiveSite {
   /// - [webRid] 直播间RID
   Future<Map> _getRoomDataByApi(String webRid) async {
     var requestHeader = await getRequestHeaders();
+
+    var queryParams = {
+      "aid": "6383",
+      "app_name": "douyin_web",
+      "live_id": "1",
+      "device_platform": "web",
+      "enter_from": "web_live",
+      "web_rid": webRid,
+      "room_id_str": "",
+      "enter_source": "",
+      "Room-Enter-User-Login-Ab": "0",
+      "is_need_double_stream": "false",
+      "cookie_enabled": "true",
+      "screen_width": "1980",
+      "screen_height": "1080",
+      "browser_language": "zh-CN",
+      "browser_platform": "Win32",
+      "browser_name": "Edge",
+      "browser_version": "125.0.0.0",
+    };
+
+    queryParams["msToken"] = ABogus.getMSToken();
+
+    var abogus = await ABogus(
+      userAgent: DouyinRequestParams.kDefaultUserAgent,
+    ).generateAbogus(Uri(queryParameters: queryParams).query);
+
+    queryParams["a_bogus"] = abogus;
+
     var result = await HttpClient.instance.getJson(
       "https://live.douyin.com/webcast/room/web/enter/",
-      //2025-08-02 dy_server checks the existence of the parameter "a_bogus" but doesn't check its value
-      queryParameters: {
-        "aid": 6383,
-        "app_name": "douyin_web",
-        "live_id": 1,
-        "device_platform": "web",
-        "enter_from": "web_live",
-        "web_rid": webRid,
-        "room_id_str": "",
-        "enter_source": "",
-        "Room-Enter-User-Login-Ab": 0,
-        "is_need_double_stream": false,
-        "cookie_enabled": true,
-        "screen_width": 1980,
-        "screen_height": 1080,
-        "browser_language": "zh-CN",
-        "browser_platform": "Win32",
-        "browser_name": "Edge",
-        "browser_version": "125.0.0.0",
-        "a_bogus": "0"
-      },
+      queryParameters: queryParams,
       header: requestHeader,
     );
     return result["data"];
@@ -590,9 +600,9 @@ class DouyinSite implements LiveSite {
   @override
   Future<LiveSearchRoomResult> searchRooms(String keyword,
       {int page = 1}) async {
-    String serverUrl = "https://www.douyin.com/aweme/v1/web/live/search/";
-    var uri = Uri.parse(serverUrl)
-        .replace(scheme: "https", port: 443, queryParameters: {
+    String serverHost = "www.douyin.com";
+    String serverPath = "/aweme/v1/web/live/search/";
+    var queryParams = {
       "device_platform": "webapp",
       "aid": "6383",
       "channel": "channel_pc_web",
@@ -626,9 +636,22 @@ class DouyinSite implements LiveSite {
       "effective_type": "4g",
       "round_trip_time": "100",
       "webid": "7382872326016435738",
-    });
-    //var requestUrl = await getAbogusUrl(uri.toString());
-    var requestUrl = uri.toString();
+    };
+
+    String chromeFp = BrowserFingerprintGenerator.generateFingerprint("Edge");
+
+    var msToken = ABogus.getMSToken();
+    queryParams["msToken"] = msToken;
+
+    var abogus = await ABogus(
+            userAgent: DouyinRequestParams.kDefaultUserAgent, fp: chromeFp)
+        .generateAbogus(
+      Uri(queryParameters: queryParams).query,
+    );
+    queryParams["a_bogus"] = abogus;
+
+    var requestUrl = Uri.https(serverHost, serverPath, queryParams).toString();
+
     var headResp = await HttpClient.instance
         .head('https://live.douyin.com', header: headers);
     var dyCookie = "";
