@@ -1,3 +1,7 @@
+// https://github.com/Johnserf-Seed/f2/blob/main/f2/utils/abogus.py
+// Original Python code is licensed under the Apache License 2.0
+// Credits to Johnserf-Seed
+
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';

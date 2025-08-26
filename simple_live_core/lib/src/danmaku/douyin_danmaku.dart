@@ -96,7 +96,7 @@ class DouyinDanmaku implements LiveDanmaku {
       url: url,
       backupUrl: backupUrl,
       headers: {
-        "User-Agnet": DouyinRequestParams.kDefaultUserAgent,
+        "User-Agent": DouyinRequestParams.kDefaultUserAgent,
         "Cookie": danmakuArgs.cookie,
         "Origin": "https://live.douyin.com"
       },

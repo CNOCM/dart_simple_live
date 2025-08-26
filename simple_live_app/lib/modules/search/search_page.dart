@@ -74,6 +74,7 @@ class SearchPage extends GetView<AppSearchController> {
                       Image.asset(
                         e.logo,
                         width: 24,
+                        semanticLabel: '${e.name} logo',
                       ),
                       AppStyle.hGap8,
                       Text(e.name),

@@ -201,18 +201,25 @@ class _FollowUserItemState extends State<FollowUserItem>
                         ),
                         if (item.watchDuration != null &&
                             item.watchDuration!.isNotEmpty)
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.access_time,
-                                  size: 12, color: Colors.grey),
-                              AppStyle.hGap4,
-                              Text(
-                                item.watchDuration!,
-                                style: const TextStyle(
-                                    fontSize: 10, color: Colors.grey),
-                              ),
-                            ],
+                          Container(
+                            width: 60,
+                            height: 20,
+                            alignment: Alignment.center,
+                            child: Row(
+                              children: [
+                                const Icon(Icons.access_time,
+                                    size: 12, color: Colors.grey),
+                                AppStyle.hGap4,
+                                Expanded(
+                                  child: Text(
+                                    item.watchDuration!,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                        fontSize: 10, color: Colors.grey),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                       ],
                     ),
