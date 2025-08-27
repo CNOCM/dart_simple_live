@@ -22,6 +22,7 @@ import 'package:simple_live_app/models/db/history.dart';
 import 'package:simple_live_app/requests/webdav_client.dart';
 import 'package:simple_live_app/services/bilibili_account_service.dart';
 import 'package:simple_live_app/services/db_service.dart';
+import 'package:simple_live_app/services/douyin_account_service.dart';
 import 'package:simple_live_app/services/local_storage_service.dart';
 import 'package:simple_live_app/services/migration_service.dart';
 
@@ -32,7 +33,8 @@ class RemoteSyncWebDAVController extends BaseController {
   var isSyncFollows = true.obs;
   var isSyncHistories = true.obs;
   var isSyncBlockWord = true.obs;
-  var isSyncBilibiliAccount = true.obs;
+  var isSyncAccount = true.obs;
+  var isSyncSetting = true.obs;
 
   late DAVClient davClient;
   var user = "--".obs;
@@ -42,7 +44,7 @@ class RemoteSyncWebDAVController extends BaseController {
   final _userFollowJsonName = 'SimpleLive_follows.json';
   final _userHistoriesJsonName = 'SimpleLive_histories.json';
   final _userBlockedWordJsonName = 'SimpleLive_blocked_word.json';
-  final _userBilibiliAccountJsonName = 'SimpleLive_bilibili_account.json';
+  final _userAccountJsonName = 'SimpleLive_bilibili_account.json';
   final _userTagsJsonName = 'SimpleLive_Tags.json';
   final _userSettingsJsonName = 'SimpleLive_Settings.json';
 
@@ -201,17 +203,24 @@ class RemoteSyncWebDAVController extends BaseController {
           .writeAsString(jsonEncode(dataShieldListMap));
 
       // bilibili_account
-      var userBiliAccountCookieMap = {
-        'data': {'cookie': BiliBiliAccountService.instance.cookie}
+      var userAccountCookieMap = {
+        'data': {
+          'cookie': BiliBiliAccountService.instance.cookie,
+          'douyin_cookie': DouyinAccountService.instance.cookie
+        }
       };
-      final bilibiliAccountJsonFile =
-          File(join(profile.path, _userBilibiliAccountJsonName));
-      await bilibiliAccountJsonFile
-          .writeAsString(jsonEncode(userBiliAccountCookieMap));
+      final accountJsonFile = File(join(profile.path, _userAccountJsonName));
+      await accountJsonFile.writeAsString(jsonEncode(userAccountCookieMap));
       await userTagsJsonFile.writeAsString(jsonEncode(dataTagsMap));
-      // 同步所有设置
-      var settingList = LocalStorageService.instance.settingsBox.toMap();
-      var dataSettingListMap = {'data': settingList};
+      // 根据需要同步部分设置，其中 HiveDbVer为必须项
+      var dataSettingListMap = {
+        'data': {
+          LocalStorageService.kHiveDbVer: LocalStorageService.instance
+              .getValue(LocalStorageService.kHiveDbVer, 10708),
+          LocalStorageService.kWebDAVLastUploadTime:
+              DateTime.now().millisecondsSinceEpoch,
+        }
+      };
       final settingJsonFile = File(join(profile.path, _userSettingsJsonName));
       await settingJsonFile.writeAsString(jsonEncode(dataSettingListMap));
 
@@ -289,35 +298,25 @@ class RemoteSyncWebDAVController extends BaseController {
         } catch (e) {
           Log.e('同步用户屏蔽词失败:$e', StackTrace.current);
         }
-      } else if (file.name == _userBilibiliAccountJsonName &&
-          isSyncBilibiliAccount.value) {
+      } else if (file.name == _userAccountJsonName && isSyncAccount.value) {
         try {
-          var cookie = jsonData['cookie'];
-          BiliBiliAccountService.instance.setCookie(cookie);
+          var biliCookie = jsonData['cookie'];
+          BiliBiliAccountService.instance.setCookie(biliCookie);
           BiliBiliAccountService.instance.loadUserInfo();
-          Log.i('已同步哔哩哔哩账号');
+          var douyinCookie = jsonData['douyin_cookie'];
+          DouyinAccountService.instance.setCookie(douyinCookie);
+          DouyinAccountService.instance.loadUserInfo();
+          Log.i('已同步用户平台账号');
         } catch (e) {
-          Log.e('同步哔哩哔哩账号失败：$e', StackTrace.current);
+          Log.e('同步用户平台账号失败：$e', StackTrace.current);
         }
-      } else if (file.name == _userTagsJsonName) {
+      } else if (file.name == _userSettingsJsonName && isSyncSetting.value) {
         try {
-          // 清空本地标签列表
-          await DBService.instance.tagBox.clear();
-          for (var item in jsonData) {
-            var tag = FollowUserTag.fromJson(item);
-            await DBService.instance.tagBox.put(tag.id, tag);
-            // 插入之后验证
-            var insertedTag = DBService.instance.tagBox.get(tag.id);
-            Log.i('Inserted tag: ${insertedTag?.tag}');
-          }
-          Log.i('已同步用户自定义标签');
-        } catch (e) {
-          Log.e('同步用户自定义标签失败:$e', StackTrace.current);
-        }
-      } else if (file.name == _userSettingsJsonName) {
-        try {
-          await LocalStorageService.instance.settingsBox.clear();
-          LocalStorageService.instance.settingsBox.putAll(jsonData);
+          jsonData.forEach(
+            (key, value) {
+              LocalStorageService.instance.setValue(key, value);
+            },
+          );
           Log.i('已同步用户设置');
         } catch (e) {
           Log.e("同步用户设置失败：$e", StackTrace.current);
@@ -365,7 +364,11 @@ class RemoteSyncWebDAVController extends BaseController {
     isSyncBlockWord.value = !isSyncBlockWord.value;
   }
 
-  void changeIsSyncBilibiliAccount() {
-    isSyncBilibiliAccount.value = !isSyncBilibiliAccount.value;
+  void changeIsSyncAccount() {
+    isSyncAccount.value = !isSyncAccount.value;
+  }
+
+  void changeIsSyncSetting() {
+    isSyncSetting.value = !isSyncSetting.value;
   }
 }
