@@ -319,6 +319,8 @@ mixin PlayerSystemMixin on PlayerMixin, PlayerStateMixin, PlayerDanmakuMixin {
       );
       await setPortraitOrientation();
     } else {
+      hideCursorTimer?.cancel();
+      showCursorState.value = true;
       bool isMaximized = await windowManager.isMaximized();
       if (isMaximized) {
         await windowManager.setFullScreen(false);
@@ -509,6 +511,9 @@ mixin PlayerGestureControlMixin
     } else {
       showControls();
     }
+    if (fullScreenState.value) {
+      showCursor();
+    }
   }
 
   //桌面端操控
@@ -516,11 +521,18 @@ mixin PlayerGestureControlMixin
     if (!showControlsState.value) {
       showControls();
     }
+
+    if (fullScreenState.value) {
+      showCursor();
+    }
   }
 
   void onExit(PointerExitEvent event) {
     if (showControlsState.value) {
       hideControls();
+    }
+    if (fullScreenState.value) {
+      hideCursor();
     }
   }
 
@@ -528,7 +540,9 @@ mixin PlayerGestureControlMixin
     final screenHeight = MediaQuery.of(context).size.height;
     final targetPosition = screenHeight * 0.25; // 计算屏幕顶部25%的位置
 
-    showCursor();
+    if (fullScreenState.value) {
+      showCursor();
+    }
 
     if (event.position.dy <= targetPosition ||
         event.position.dy >= targetPosition * 3) {

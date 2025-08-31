@@ -90,6 +90,9 @@ Widget buildFullControls(
               onHover: (PointerHoverEvent event) {
                 controller.onHover(event, videoState.context);
               },
+              cursor: controller.showCursorState.value
+                  ? SystemMouseCursors.basic
+                  : SystemMouseCursors.none,
               child: Container(
                 width: double.infinity,
                 height: double.infinity,
@@ -458,19 +461,12 @@ Widget buildControls(
           onVerticalDragUpdate: controller.onVerticalDragUpdate,
           onVerticalDragEnd: controller.onVerticalDragEnd,
           //onLongPress: controller.showDebugInfo,
-          child: Obx(
-            () => MouseRegion(
-              onEnter: controller.onEnter,
-              cursor: controller.fullScreenState.value
-                  ? (controller.showCursorState.value
-                      ? SystemMouseCursors.basic
-                      : SystemMouseCursors.none)
-                  : SystemMouseCursors.basic,
-              child: Container(
-                width: double.infinity,
-                height: double.infinity,
-                color: Colors.transparent,
-              ),
+          child: MouseRegion(
+            onEnter: controller.onEnter,
+            child: Container(
+              width: double.infinity,
+              height: double.infinity,
+              color: Colors.transparent,
             ),
           ),
         ),
@@ -648,6 +644,7 @@ Widget buildControls(
 Widget buildDanmuView(VideoState videoState, LiveRoomController controller) {
   var padding = MediaQuery.of(videoState.context).padding;
   controller.danmakuView ??= DanmakuScreen(
+    key: controller.globalDanmuKey,
     createdController: controller.initDanmakuController,
     option: DanmakuOption(
       fontSize: AppSettingsController.instance.danmuSize.value,
@@ -973,7 +970,7 @@ class _PlayerSuperChatCardState extends State<PlayerSuperChatCard> {
       opacity: 0.65,
       child: SuperChatCard(
         widget.message,
-        onExpire: widget.onExpire,
+        onExpire: () {},
         customCountdown: countdown,
       ),
     );
