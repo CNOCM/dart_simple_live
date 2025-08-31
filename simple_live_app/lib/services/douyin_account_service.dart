@@ -12,7 +12,7 @@ import 'package:simple_live_core/simple_live_core.dart';
 class DouyinAccountService extends GetxService {
   static DouyinAccountService get instance => Get.find<DouyinAccountService>();
 
-  var logined = false.obs;
+  var logged = false.obs;
   var cookie = "";
   var name = "未登录".obs;
 
@@ -20,7 +20,7 @@ class DouyinAccountService extends GetxService {
   void onInit() {
     cookie = LocalStorageService.instance
         .getValue(LocalStorageService.kDouyinCookie, "");
-    logined.value = cookie.isNotEmpty;
+    logged.value = cookie.isNotEmpty;
     loadUserInfo();
     super.onInit();
   }
@@ -39,7 +39,7 @@ class DouyinAccountService extends GetxService {
       }
       var info = DouyinUserInfoModel.fromJson(data);
       name.value = info.nickname!;
-      logined.value = true;
+      logged.value = true;
       _setSite();
     } catch (e) {
       SmartDialog.showToast("获取抖音登录用户信息失败，可前往账号管理重试");
@@ -65,7 +65,7 @@ class DouyinAccountService extends GetxService {
     cookie = "";
     LocalStorageService.instance
         .setValue(LocalStorageService.kDouyinCookie, "");
-    logined.value = false;
+    logged.value = false;
     name.value = "未登录";
     _setSite();
     if (Platform.isAndroid || Platform.isIOS) {

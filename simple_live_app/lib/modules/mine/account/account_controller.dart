@@ -239,7 +239,7 @@ class AccountController extends GetxController {
 
   // 需要用户手动复制抖音的Cookie
   void douyinTap() async {
-    if (DouyinAccountService.instance.logined.value) {
+    if (DouyinAccountService.instance.logged.value) {
       var result =
           await Utils.showAlertDialog("确定要清除抖音Cookie吗？", title: "清除Cookie");
       if (result) {

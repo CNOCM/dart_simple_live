@@ -69,7 +69,7 @@ class AccountPage extends GetView<AccountController> {
               ),
               title: const Text("抖音直播"),
               subtitle: Text(DouyinAccountService.instance.name.value),
-              trailing: DouyinAccountService.instance.logined.value
+              trailing: DouyinAccountService.instance.logged.value
                   ? const Icon(Icons.logout)
                   : const Icon(Icons.chevron_right),
               onTap: controller.douyinTap,

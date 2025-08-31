@@ -1,10 +1,10 @@
-name: app-tv-build-action-nightly
+name: app-tv-build-action-dev
 
 on:
     workflow_dispatch:
     push:
         branches:
-            - nightly
+            - dev
         paths:
             - 'simple_live_tv_app/**'
 
@@ -23,7 +23,7 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v4
               with:
-                  ref: nightly
+                  ref: dev
 
             # Android TV 签名
             - name: Decode Android TV keystore
@@ -83,7 +83,7 @@ jobs:
             - name: AndroidTV build done
               run: echo "🍏 AndroidTV build done."
 
-    release-nightly:
+    release-dev:
         needs: [build-android-tv]
         runs-on: ubuntu-latest
         permissions:
@@ -103,12 +103,12 @@ jobs:
 
             - name: Upload TV release assets
               run: |
-                  gh release create nightly ./artifacts/* \
-                    --notes "Automated nightly build at ${{ steps.datetime.outputs.value }}" \
-                    --prerelease --title "Nightly ${{ steps.datetime.outputs.value }}" --repo ${{ github.repository }} || true
-                  gh release upload nightly artifacts/* --clobber --repo ${{ github.repository }}
+                  gh release create dev ./artifacts/* \
+                    --notes "Automated dev build at ${{ steps.datetime.outputs.value }}" \
+                    --prerelease --title "dev ${{ steps.datetime.outputs.value }}" --repo ${{ github.repository }} || true
+                  gh release upload dev artifacts/* --clobber --repo ${{ github.repository }}
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Release updated
-              run: echo "🎉 TV APK added to nightly pre-release."
+              run: echo "🎉 TV APK added to dev pre-release."
